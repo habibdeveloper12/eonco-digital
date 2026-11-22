@@ -1,0 +1,94 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Testing
+coverage/
+.nyc_output/
+
+# Production builds
+build/
+dist/
+out/
+
+# Next.js
+.next/
+.next-dev/
+
+# Nuxt
+.nuxt/
+.output/
+
+# Gatsby
+.cache/
+public/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Package managers
+.pnpm-store/
+.yarn/
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# TypeScript
+*.tsbuildinfo
+
+# Framework / tool caches
+.eslintcache
+.stylelintcache
+.parcel-cache/
+.turbo/
+.vite/
+
+# IDE / editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Operating systems
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+Desktop.ini
+
+# Deployment
+.vercel/
+.netlify/
+.firebase/
+
+# Generated assets
+*.tgz
+*.pid
+*.pid.lock
+*.seed
+
+# Local tooling
+*.local
+.tmp/
+tmp/
