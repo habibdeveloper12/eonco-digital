@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name:       Eonco Headless
- * Description:       Lets the Eonco Digital website (Next.js) read Projects, Testimonials and Blog posts from this WordPress site, and refreshes the website the moment content is published.
- * Version:           1.2.0
+ * Description:       Runs the Eonco Digital website (Next.js) from this dashboard: services, industries, HubSpot themes, pages, projects, testimonials, blog posts, homepage text and SEO. The website refreshes the moment content is published.
+ * Version:           1.3.0
  * Update URI:        eonco-headless
  * Requires at least: 6.2
  * Requires PHP:      7.4
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 final class Eonco_Headless
 {
     const OPT = 'eonco_headless';
-    const VERSION = '1.2.0';
+    const VERSION = '1.3.0';
 
     /** Industries must match IndustrySlug in src/content/caseStudies.ts */
     const INDUSTRIES = [
@@ -221,8 +221,17 @@ final class Eonco_Headless
                 'eonco_role'     => ['Role & company', 'text', 'e.g. Head of Sales, Acme Logistics'],
                 'eonco_featured' => ['Use as the large featured quote', 'checkbox', 'Only one testimonial should be featured.'],
             ],
-        ];
+        ] + (class_exists('Eonco_Content') ? Eonco_Content::fields() : []);
     }
+
+    /** Titles of the details box per content type. */
+    const BOXES = [
+        'case_study'  => 'Project details',
+        'testimonial' => 'Testimonial details',
+        'service'     => 'Service page content',
+        'industry'    => 'Industry page content',
+        'hs_theme'    => 'Theme details',
+    ];
 
     public static function register_meta()
     {
@@ -260,8 +269,9 @@ final class Eonco_Headless
 
     public static function meta_boxes()
     {
-        add_meta_box('eonco_project', 'Project details', [__CLASS__, 'render_box'], 'case_study', 'normal', 'high');
-        add_meta_box('eonco_testimonial', 'Testimonial details', [__CLASS__, 'render_box'], 'testimonial', 'normal', 'high');
+        foreach (self::BOXES as $type => $title) {
+            add_meta_box('eonco_details_' . $type, $title, [__CLASS__, 'render_box'], $type, 'normal', 'high');
+        }
     }
 
     public static function render_box($post)
@@ -271,11 +281,14 @@ final class Eonco_Headless
         echo '<style>.eonco-f{margin:0 0 18px}.eonco-f label{display:block;font-weight:600;margin-bottom:6px}.eonco-f input[type=text],.eonco-f textarea,.eonco-f select{width:100%;max-width:720px}.eonco-f textarea{min-height:110px}.eonco-f .description{margin-top:4px}</style>';
         if ($post->post_type === 'case_study') {
             echo '<p class="description" style="margin-bottom:16px">Use the <strong>Excerpt</strong> box below for the one-sentence summary, and <strong>Featured image</strong> (right) for a screenshot of the work. Without an image, the site draws a mockup using the colours below.</p>';
-        } else {
+        } elseif ($post->post_type === 'testimonial') {
             echo '<p class="description" style="margin-bottom:16px">Write the quote in the main editor above. Only publish quotes the client has approved.</p>';
+        } elseif (class_exists('Eonco_Content')) {
+            echo '<p class="description" style="margin-bottom:16px">' . wp_kses_post(Eonco_Content::box_intro($post->post_type)) . '</p>';
         }
         foreach ($fields as $key => $f) {
             [$label, $type, $help] = $f;
+            $options = $f[3] ?? [];
             $val = get_post_meta($post->ID, $key, true);
             echo '<div class="eonco-f">';
             if ($type === 'checkbox') {
@@ -287,11 +300,18 @@ final class Eonco_Headless
                         printf('<textarea id="%1$s" name="%1$s">%2$s</textarea>', esc_attr($key), esc_textarea($val));
                         break;
                     case 'color':
-                        printf('<input type="color" id="%1$s" name="%1$s" value="%2$s">', esc_attr($key), esc_attr($val ?: ($key === 'eonco_color_ink' ? '#ffffff' : ($key === 'eonco_color_accent' ? '#dc1f36' : '#0a2035'))));
+                        $defaults = ['eonco_color_ink' => '#ffffff', 'eonco_color_accent' => '#dc1f36', 'eonco_frame' => '#012c4c'];
+                        printf('<input type="color" id="%1$s" name="%1$s" value="%2$s">', esc_attr($key), esc_attr($val ?: ($defaults[$key] ?? '#0a2035')));
+                        break;
+                    case 'url':
+                        printf('<input type="url" id="%1$s" name="%1$s" value="%2$s" placeholder="https://">', esc_attr($key), esc_attr($val));
                         break;
                     case 'industry':
+                    case 'select':
+                        $choices = $type === 'industry' ? (class_exists('Eonco_Content') ? Eonco_Content::industry_options() : self::INDUSTRIES) : $options;
                         printf('<select id="%1$s" name="%1$s">', esc_attr($key));
-                        foreach (self::INDUSTRIES as $slug => $name) {
+                        if ($type === 'select') echo '<option value="">— Keep the website’s current choice —</option>';
+                        foreach ($choices as $slug => $name) {
                             printf('<option value="%s" %s>%s</option>', esc_attr($slug), selected($val, $slug, false), esc_html($name));
                         }
                         echo '</select>';
@@ -321,7 +341,19 @@ final class Eonco_Headless
                 continue;
             }
             $raw = isset($_POST[$key]) ? wp_unslash($_POST[$key]) : '';
-            $val = $type === 'textarea' ? sanitize_textarea_field($raw) : ($type === 'color' ? (sanitize_hex_color($raw) ?: '') : sanitize_text_field($raw));
+            switch ($type) {
+                case 'textarea':
+                    $val = sanitize_textarea_field($raw);
+                    break;
+                case 'color':
+                    $val = sanitize_hex_color($raw) ?: '';
+                    break;
+                case 'url':
+                    $val = esc_url_raw(trim($raw));
+                    break;
+                default:
+                    $val = sanitize_text_field($raw);
+            }
             update_post_meta($post_id, $key, $val);
         }
     }
@@ -334,7 +366,7 @@ final class Eonco_Headless
 
     private static function watched($post)
     {
-        return $post && in_array($post->post_type, ['post', 'case_study', 'testimonial'], true) && !wp_is_post_revision($post) && !wp_is_post_autosave($post);
+        return $post && in_array($post->post_type, ['post', 'page', 'case_study', 'testimonial', 'service', 'industry', 'hs_theme'], true) && !wp_is_post_revision($post) && !wp_is_post_autosave($post);
     }
 
     public static function on_status_change($new, $old, $post)
@@ -361,6 +393,12 @@ final class Eonco_Headless
         add_action('shutdown', function () {
             self::revalidate(false);
         });
+    }
+
+    /** Ask the website to refresh now (used after imports and settings changes). */
+    public static function refresh_website()
+    {
+        return self::revalidate(false);
     }
 
     private static function revalidate($blocking)
@@ -394,6 +432,7 @@ final class Eonco_Headless
                     'frontend_url' => esc_url_raw(trim($in['frontend_url'] ?? '')),
                     'secret'       => sanitize_text_field($in['secret'] ?? ''),
                     'redirect'     => !empty($in['redirect']),
+                    'noindex'      => !empty($in['noindex']),
                 ];
             },
         ]);
@@ -401,12 +440,13 @@ final class Eonco_Headless
 
     public static function settings_page()
     {
-        $o = wp_parse_args(get_option(self::OPT, []), ['frontend_url' => '', 'secret' => '', 'redirect' => false]);
+        $o = wp_parse_args(get_option(self::OPT, []), ['frontend_url' => '', 'secret' => '', 'redirect' => false, 'noindex' => true]);
         $result = isset($_GET['eonco_test']) ? sanitize_text_field(wp_unslash($_GET['eonco_test'])) : '';
+        $import = isset($_GET['eonco_import']) ? sanitize_text_field(wp_unslash($_GET['eonco_import'])) : '';
         ?>
         <div class="wrap">
             <h1>Eonco Website</h1>
-            <p>Connects this WordPress dashboard to the Eonco Digital website. Projects, Testimonials and Posts published here appear on the website within seconds.</p>
+            <p>Connects this WordPress dashboard to the Eonco Digital website. Services, Industries, HubSpot Themes, Pages, Projects, Testimonials and Posts published here appear on the website within seconds.</p>
             <?php if ($result === 'ok') : ?>
                 <div class="notice notice-success"><p>Connected. The website refreshed successfully.</p></div>
             <?php elseif ($result) : ?>
@@ -430,6 +470,11 @@ final class Eonco_Headless
                         <td><label><input type="checkbox" name="<?php echo esc_attr(self::OPT); ?>[redirect]" value="1" <?php checked($o['redirect']); ?>> Send visitors of this WordPress site's public pages to the website</label>
                             <p class="description">Only turn this on once the new website is live. The dashboard and API keep working.</p></td>
                     </tr>
+                    <tr>
+                        <th scope="row">Search engines</th>
+                        <td><label><input type="checkbox" name="<?php echo esc_attr(self::OPT); ?>[noindex]" value="1" <?php checked($o['noindex']); ?>> Hide this WordPress site from Google and other search engines</label>
+                            <p class="description">Recommended. The website is the public site; without this Google can index this dashboard’s copy of your content as a duplicate. Does not affect the website’s own ranking.</p></td>
+                    </tr>
                 </table>
                 <?php submit_button(); ?>
             </form>
@@ -437,6 +482,32 @@ final class Eonco_Headless
                 <input type="hidden" name="action" value="eonco_test_revalidate">
                 <?php wp_nonce_field('eonco_test'); ?>
                 <?php submit_button('Test connection', 'secondary'); ?>
+            </form>
+
+            <hr>
+            <h2 id="import">Import website content</h2>
+            <?php
+            if ($import && strpos($import, 'ok:') === 0) {
+                [, $created, $skipped, $failed] = array_map('intval', explode(':', $import)) + [0, 0, 0, 0];
+                printf('<div class="notice notice-success"><p>Import finished: %d created, %d already existed (left unchanged)%s. The website is refreshing.</p></div>', $created, $skipped, $failed ? ", {$failed} failed" : '');
+            } elseif ($import) {
+                printf('<div class="notice notice-error"><p>%s</p></div>', esc_html($import));
+            }
+            ?>
+            <p>Copies the website’s current content into this dashboard so you can edit it here instead of starting from blank pages. Items that already exist (same slug) are never overwritten, so it is safe to run again.</p>
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                <input type="hidden" name="action" value="eonco_import">
+                <?php wp_nonce_field('eonco_import'); ?>
+                <fieldset>
+                    <label><input type="checkbox" name="what[]" value="services" checked> <strong>Services</strong> (16 service pages, published)</label><br>
+                    <label><input type="checkbox" name="what[]" value="industries" checked> <strong>Industries</strong> (published)</label><br>
+                    <label><input type="checkbox" name="what[]" value="themes" checked> <strong>HubSpot Themes</strong> (published)</label><br>
+                    <label><input type="checkbox" name="what[]" value="posts" checked> <strong>Blog posts</strong> (published, so the blog keeps its articles)</label><br>
+                    <label><input type="checkbox" name="what[]" value="homepage" checked> <strong>Homepage headline &amp; FAQ</strong> (only fills empty fields)</label><br>
+                    <label><input type="checkbox" name="what[]" value="pages" checked> <strong>Privacy Policy &amp; Terms</strong> (as drafts: have them reviewed, then publish)</label><br>
+                    <label><input type="checkbox" name="what[]" value="projects"> <strong>Sample projects</strong> (as drafts: these are examples, only publish real client work)</label>
+                </fieldset>
+                <?php submit_button('Import website content', 'primary'); ?>
             </form>
         </div>
         <?php
@@ -464,16 +535,26 @@ final class Eonco_Headless
     const SITE = 'eonco_site';
     const SOCIALS = ['linkedin' => 'LinkedIn', 'facebook' => 'Facebook', 'instagram' => 'Instagram', 'x' => 'X (Twitter)', 'youtube' => 'YouTube'];
 
+    const FAQ_SLOTS = 10;
+
     public static function site_defaults()
     {
         return [
-            'email'         => '',
-            'phone'         => '',
-            'partner_label' => '',
-            'socials'       => array_fill_keys(array_keys(self::SOCIALS), ''),
-            'offices'       => array_fill(0, 3, ['region' => '', 'address' => '', 'phone' => '']),
-            'stats'         => array_fill(0, 4, ['label' => '', 'value' => '', 'note' => '']),
-            'why'           => array_fill(0, 3, ['value' => '', 'title' => '', 'text' => '']),
+            'email'            => '',
+            'phone'            => '',
+            'partner_label'    => '',
+            'hero_lines'       => '',
+            'hero_text'        => '',
+            'home_title'       => '',
+            'home_description' => '',
+            'seo_title'        => '',
+            'seo_description'  => '',
+            'seo_image'        => '',
+            'socials'          => array_fill_keys(array_keys(self::SOCIALS), ''),
+            'offices'          => array_fill(0, 3, ['region' => '', 'address' => '', 'phone' => '']),
+            'stats'            => array_fill(0, 4, ['label' => '', 'value' => '', 'note' => '']),
+            'why'              => array_fill(0, 3, ['value' => '', 'title' => '', 'text' => '']),
+            'faqs'             => array_fill(0, self::FAQ_SLOTS, ['q' => '', 'a' => '']),
         ];
     }
 
@@ -483,9 +564,10 @@ final class Eonco_Headless
         $o = get_option(self::SITE, []);
         $o = is_array($o) ? $o : [];
         $out = wp_parse_args($o, $d);
-        foreach (['socials', 'offices', 'stats', 'why'] as $k) {
+        foreach (['socials', 'offices', 'stats', 'why', 'faqs'] as $k) {
             $out[$k] = is_array($out[$k]) ? $out[$k] : $d[$k];
         }
+        $out['faqs'] = array_pad(array_slice($out['faqs'], 0, self::FAQ_SLOTS), self::FAQ_SLOTS, ['q' => '', 'a' => '']);
         return $out;
     }
 
@@ -516,11 +598,23 @@ final class Eonco_Headless
             'email'         => sanitize_email($in['email'] ?? ''),
             'phone'         => sanitize_text_field($in['phone'] ?? ''),
             'partner_label' => sanitize_text_field($in['partner_label'] ?? ''),
+            'hero_lines'       => sanitize_textarea_field($in['hero_lines'] ?? ''),
+            'hero_text'        => sanitize_textarea_field($in['hero_text'] ?? ''),
+            'home_title'       => sanitize_text_field($in['home_title'] ?? ''),
+            'home_description' => sanitize_textarea_field($in['home_description'] ?? ''),
+            'seo_title'        => sanitize_text_field($in['seo_title'] ?? ''),
+            'seo_description'  => sanitize_textarea_field($in['seo_description'] ?? ''),
+            'seo_image'        => esc_url_raw(trim($in['seo_image'] ?? '')),
             'socials'       => [],
             'offices'       => [],
             'stats'         => [],
             'why'           => [],
+            'faqs'          => [],
         ];
+        for ($i = 0; $i < self::FAQ_SLOTS; $i++) {
+            $q = $in['faqs'][$i] ?? [];
+            $clean['faqs'][] = ['q' => sanitize_text_field($q['q'] ?? ''), 'a' => sanitize_textarea_field($q['a'] ?? '')];
+        }
         foreach (array_keys(self::SOCIALS) as $k) {
             $clean['socials'][$k] = esc_url_raw(trim($in['socials'][$k] ?? ''));
         }
@@ -563,6 +657,38 @@ final class Eonco_Headless
                     <tr><th>Email</th><td><?php $f("{$n}[email]", $s['email'], 'hello@eoncodigital.com', 'email'); ?></td></tr>
                     <tr><th>Main phone</th><td><?php $f("{$n}[phone]", $s['phone'], '+61 2 0000 0000'); ?></td></tr>
                     <tr><th>Hero label</th><td><?php $f("{$n}[partner_label]", $s['partner_label'], 'HubSpot Specialists'); ?><p class="description">The small label above the homepage headline, e.g. your real HubSpot partner tier.</p></td></tr>
+                </table>
+
+                <h2>Homepage</h2>
+                <table class="form-table" role="presentation">
+                    <tr><th>Headline</th><td><textarea class="large-text" rows="3" name="<?php echo esc_attr("{$n}[hero_lines]"); ?>" placeholder="Growth Runs&#10;on Systems.&#10;We Build Them."><?php echo esc_textarea($s['hero_lines']); ?></textarea>
+                        <p class="description">One line per row (2 to 4 short lines). The last line is shown in brand red.</p></td></tr>
+                    <tr><th>Intro text</th><td><textarea class="large-text" rows="3" name="<?php echo esc_attr("{$n}[hero_text]"); ?>"><?php echo esc_textarea($s['hero_text']); ?></textarea></td></tr>
+                    <tr><th>Google title</th><td><?php $f("{$n}[home_title]", $s['home_title'], 'Eonco Digital | HubSpot Implementation, Integration & Website Agency'); ?>
+                        <p class="description">The homepage title in Google (about 60 characters). Include “HubSpot agency” or your main service.</p></td></tr>
+                    <tr><th>Google description</th><td><textarea class="large-text" rows="2" name="<?php echo esc_attr("{$n}[home_description]"); ?>"><?php echo esc_textarea($s['home_description']); ?></textarea>
+                        <p class="description">About 150 characters, shown under the title in Google.</p></td></tr>
+                </table>
+
+                <h2>Homepage FAQ</h2>
+                <p class="description">Shown on the homepage and given to Google and AI assistants as FAQ answers. Answer each question directly in the first sentence. Leave all empty to keep the website’s current questions.</p>
+                <table class="form-table" role="presentation">
+                    <?php foreach ($s['faqs'] as $i => $q) : ?>
+                        <tr><th>Question <?php echo (int) $i + 1; ?></th><td>
+                            <p><?php $f("{$n}[faqs][{$i}][q]", $q['q'] ?? '', 'Question, e.g. How much does HubSpot implementation cost?'); ?></p>
+                            <p><textarea class="large-text" rows="3" name="<?php echo esc_attr("{$n}[faqs][{$i}][a]"); ?>" placeholder="Answer"><?php echo esc_textarea($q['a'] ?? ''); ?></textarea></p>
+                        </td></tr>
+                    <?php endforeach; ?>
+                </table>
+
+                <h2>Default search &amp; social</h2>
+                <p class="description">Used for pages that have no SEO fields of their own.</p>
+                <table class="form-table" role="presentation">
+                    <tr><th>Default title</th><td><?php $f("{$n}[seo_title]", $s['seo_title'], 'Eonco Digital | HubSpot Implementation, Integration & Web Agency'); ?></td></tr>
+                    <tr><th>Default description</th><td><textarea class="large-text" rows="2" name="<?php echo esc_attr("{$n}[seo_description]"); ?>"><?php echo esc_textarea($s['seo_description']); ?></textarea></td></tr>
+                    <tr><th>Default share image</th><td><input type="url" class="regular-text" id="eonco_site_seo_image" name="<?php echo esc_attr("{$n}[seo_image]"); ?>" value="<?php echo esc_attr($s['seo_image']); ?>" placeholder="https://">
+                        <button type="button" class="button eonco-pick-image" data-target="eonco_site_seo_image">Choose image</button>
+                        <p class="description">1200 × 630 px. Shown when the homepage or a page is shared on LinkedIn, Facebook or X.</p></td></tr>
                 </table>
 
                 <h2>Social profiles</h2>
@@ -624,3 +750,5 @@ final class Eonco_Headless
 }
 
 Eonco_Headless::init();
+
+require_once __DIR__ . '/includes/content.php';

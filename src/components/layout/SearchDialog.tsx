@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { ArrowUpRight, Search, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { searchIndex } from "@/lib/searchIndex";
+import { searchIndex as defaultIndex, type SearchEntry } from "@/lib/searchIndex";
 import { cn } from "../ui/cn";
 import { usePresence } from "../ui/usePresence";
 
-export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function SearchDialog({ open, onClose, index }: { open: boolean; onClose: () => void; index?: SearchEntry[] }) {
+  const searchIndex = index ?? defaultIndex;
   const [q, setQ] = useState("");
   const input = useRef<HTMLInputElement>(null);
   const { mounted, shown } = usePresence(open);
@@ -24,7 +25,7 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
     const term = q.trim().toLowerCase();
     if (!term) return searchIndex.slice(0, 6);
     return searchIndex.filter((e) => `${e.title} ${e.text} ${e.type}`.toLowerCase().includes(term)).slice(0, 10);
-  }, [q]);
+  }, [q, searchIndex]);
 
   return (
     mounted && (

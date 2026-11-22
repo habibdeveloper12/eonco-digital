@@ -67,6 +67,13 @@ export type Product = {
   palette: [string, string, string];
   headline: string;
   features: string[];
+  html?: string;
+  image?: string;
+  imageAlt?: string;
+  /** Where the "Get theme" button goes, e.g. a HubSpot Marketplace listing. */
+  buyUrl?: string;
+  seo?: import("@/lib/wordpress").Seo;
+  modified?: string;
 };
 
 /** SAMPLE products. Replace with Eonco's own themes and modules. */
@@ -109,7 +116,19 @@ export const integrations = [
   "Email & SMS", "Accounting & Bookkeeping", "Advertising & Paid Media",
 ];
 
-export type Industry = { slug: IndustrySlug; name: string; icon: string; blurb: string; intro: string; needs: string[] };
+export type Industry = {
+  slug: IndustrySlug;
+  name: string;
+  icon: string;
+  blurb: string;
+  intro: string;
+  needs: string[];
+  html?: string;
+  image?: string;
+  imageAlt?: string;
+  seo?: import("@/lib/wordpress").Seo;
+  modified?: string;
+};
 
 export const industries: Industry[] = [
   { slug: "professional-services", name: "Professional Services", icon: "Briefcase", blurb: "Helping service businesses build trust and generate more qualified leads.", intro: "Consultancies, agencies, accounting and legal firms use HubSpot to manage long sales cycles, referrals and recurring engagements.", needs: ["Referral and partner tracking", "Proposal and quote automation", "Client onboarding workflows", "Utilisation and pipeline reporting"] },

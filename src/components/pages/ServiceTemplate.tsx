@@ -11,6 +11,7 @@ import { CaseTile } from "./CaseTile";
 import { Faq } from "./Faq";
 import { ServiceHeroVisual } from "./HeroVisual";
 import { PageHero } from "./PageHero";
+import { RichContent } from "./RichContent";
 import { SectionHeader } from "./SectionHeader";
 
 export function ServiceTemplate({ s, related }: { s: Service; related: Project[] }) {
@@ -21,8 +22,8 @@ export function ServiceTemplate({ s, related }: { s: Service; related: Project[]
         title={s.heroTitle}
         text={s.heroText}
         primary={{ label: "Get a quote", href: `/start-a-project?service=${s.slug}` }}
-        secondary={{ label: "See all packages", href: "#packages" }}
-        visual={<ServiceHeroVisual icon={s.icon} label={s.name} />}
+        secondary={s.packages.length ? { label: "See all packages", href: "#packages" } : undefined}
+        visual={<ServiceHeroVisual icon={s.icon} label={s.name} image={s.image} imageAlt={s.imageAlt} />}
       />
 
       {/* Intro */}
@@ -42,8 +43,17 @@ export function ServiceTemplate({ s, related }: { s: Service; related: Project[]
         </div>
       </section>
 
+      {/* In depth: long-form content written in the WordPress editor */}
+      {s.html && (
+        <section className="pb-[40px]">
+          <div className="mx-auto max-w-[820px] px-5">
+            <RichContent html={s.html} />
+          </div>
+        </section>
+      )}
+
       {/* Problems */}
-      <section className="py-[80px]">
+      {s.problems.length > 0 && <section className="py-[80px]">
         <div className="container-narrow gutter">
           <SectionHeader eyebrow="The problem" title={`Why ${s.name}`} accent="Projects Stall" text="Most teams do not fail because of the software. They fail because of the four gaps below." />
           <div className="mt-12 grid gap-4 md:grid-cols-2">
@@ -58,10 +68,10 @@ export function ServiceTemplate({ s, related }: { s: Service; related: Project[]
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* Starting points */}
-      <section className="py-[80px]">
+      {s.starting.length > 0 && <section className="py-[80px]">
         <div className="container-narrow gutter">
           <SectionHeader eyebrow="Your situation" title="Where Are You" accent="Starting From?" />
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -79,10 +89,10 @@ export function ServiceTemplate({ s, related }: { s: Service; related: Project[]
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* Results */}
-      <section className="bg-cream-3 py-[80px]">
+      {s.results.length > 0 && <section className="bg-cream-3 py-[80px]">
         <div className="container-narrow gutter">
           <SectionHeader eyebrow="Outcomes" title="What Results" accent="You Can Expect" />
           <div className="mt-12 grid gap-4 md:grid-cols-2">
@@ -101,10 +111,10 @@ export function ServiceTemplate({ s, related }: { s: Service; related: Project[]
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* Types */}
-      <section className="bg-cream-3 pb-[80px]">
+      {s.types.length > 0 && <section className="bg-cream-3 pb-[80px]">
         <div className="container-narrow gutter">
           <SectionHeader eyebrow="What we deliver" title={`Types of ${s.name}`} accent="Services We Offer" />
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -119,10 +129,10 @@ export function ServiceTemplate({ s, related }: { s: Service; related: Project[]
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* Comparison */}
-      <section className="py-[80px]">
+      {s.comparison.rows.length > 0 && <section className="py-[80px]">
         <div className="container-narrow gutter">
           <SectionHeader eyebrow="Comparison" title="Typical Approach vs" accent="Eonco Digital" />
           <Reveal className="mt-12 overflow-x-auto rounded-[20px] border-[0.8px] border-line">
@@ -164,10 +174,10 @@ export function ServiceTemplate({ s, related }: { s: Service; related: Project[]
             </table>
           </Reveal>
         </div>
-      </section>
+      </section>}
 
       {/* Process */}
-      <section className="py-[80px]">
+      {s.process.length > 0 && <section className="py-[80px]">
         <div className="container-narrow gutter grid gap-12 lg:grid-cols-[360px_1fr]">
           <div className="lg:sticky lg:top-[120px] lg:self-start">
             <SectionHeader align="left" eyebrow="Process" title={`Our ${s.name}`} accent="Process" text="Six stages, each with a clear output you sign off before we move on." />
@@ -186,10 +196,10 @@ export function ServiceTemplate({ s, related }: { s: Service; related: Project[]
             ))}
           </ol>
         </div>
-      </section>
+      </section>}
 
       {/* Packages */}
-      <section id="packages" className="scroll-mt-24 bg-cloud py-[100px]">
+      {s.packages.length > 0 && <section id="packages" className="scroll-mt-24 bg-cloud py-[100px]">
         <div className="container-narrow gutter">
           <SectionHeader eyebrow="Packages" title={`${s.name}`} accent="Cost & Packages" />
           <div className="mt-12 grid gap-5 lg:grid-cols-3">
@@ -232,10 +242,10 @@ export function ServiceTemplate({ s, related }: { s: Service; related: Project[]
           </div>
           <p className="mt-6 text-center text-[13px] text-muted">Prices in USD and indicative. Final pricing is confirmed after discovery.</p>
         </div>
-      </section>
+      </section>}
 
       {/* Featured works */}
-      <section className="bg-navy py-[90px]">
+      {related.length > 0 && <section className="bg-navy py-[90px]">
         <div className="container-narrow gutter">
           <SectionHeader dark eyebrow="Case studies" title="Our Featured" accent="Works" />
           <div className="mt-12 grid gap-8 md:grid-cols-3">
@@ -246,17 +256,17 @@ export function ServiceTemplate({ s, related }: { s: Service; related: Project[]
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
       <WhyUs />
 
       {/* FAQ */}
-      <section className="bg-white py-[80px]">
+      {s.faqs.length > 0 && <section className="bg-white py-[80px]">
         <div className="container-narrow gutter grid gap-10 lg:grid-cols-[360px_1fr]">
           <SectionHeader align="left" eyebrow="FAQ" title="Questions You" accent="Might Have" />
           <Faq items={s.faqs} />
         </div>
-      </section>
+      </section>}
 
       <ConsultCta title={["Start Your ", s.name, " with Eonco"]} />
     </>

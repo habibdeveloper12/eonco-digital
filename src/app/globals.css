@@ -132,6 +132,22 @@
   .prose-y pre { background: var(--color-navy); color: #fff; padding: 20px; border-radius: 12px; overflow-x: auto; font-size: 14px; margin: 24px 0; }
   .prose-y table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 15px; }
   .prose-y th, .prose-y td { border-bottom: 1px solid var(--color-line); padding: 10px 8px; text-align: left; }
+  .prose-y h4 { font-family: var(--font-heading); font-size: 18px; font-weight: 600; margin: 24px 0 10px; color: var(--color-navy); }
+  .prose-y > :first-child { margin-top: 0; }
+  /* WordPress block editor output */
+  .prose-y .wp-block-columns { display: grid; gap: 28px; margin: 28px 0; }
+  @media (min-width: 768px) { .prose-y .wp-block-columns { grid-auto-flow: column; grid-auto-columns: 1fr; } }
+  .prose-y .wp-block-embed iframe, .prose-y iframe[src*="youtube"], .prose-y iframe[src*="vimeo"] { width: 100%; aspect-ratio: 16 / 9; height: auto; }
+  .prose-y .wp-block-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0; }
+  .prose-y .wp-block-button__link { display: inline-flex; align-items: center; border-radius: 999px; background: var(--color-brand); color: #fff; padding: 12px 24px; font-weight: 500; text-decoration: none; }
+  .prose-y .wp-block-button__link:hover { background: var(--color-brand-600); }
+  .prose-y .is-style-outline .wp-block-button__link { background: transparent; color: var(--color-navy); border: 1px solid var(--color-line); }
+  .prose-y .aligncenter, .prose-y .has-text-align-center { text-align: center; margin-left: auto; margin-right: auto; }
+  .prose-y .wp-block-image img { margin: 0; }
+  .prose-y .wp-block-table { overflow-x: auto; }
+  .prose-y .wp-block-quote cite, .prose-y blockquote cite { display: block; margin-top: 8px; font-size: 14px; color: var(--color-muted); font-style: normal; }
+  .prose-y details { border-bottom: 1px solid var(--color-line); padding: 14px 0; }
+  .prose-y summary { cursor: pointer; font-weight: 600; color: var(--color-navy); }
 
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { scrollbar-width: none; }

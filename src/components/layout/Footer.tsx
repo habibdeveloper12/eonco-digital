@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, Award, BadgeCheck, Download, Mail, MapPin, Phone, ShieldCheck, Users } from "lucide-react";
-import { footerColumns } from "@/content/navigation";
+import { footerColumns as defaultColumns, type FooterColumn } from "@/content/navigation";
 import { site } from "@/content/site";
 import type { SiteSettings } from "@/lib/wordpress";
 import { Logo } from "../visuals/Logo";
@@ -12,7 +12,7 @@ const tiles = [
   { icon: Users, title: "Dedicated", sub: "Delivery team" },
 ];
 
-export function Footer({ settings }: { settings: SiteSettings }) {
+export function Footer({ settings, columns: footerColumns = defaultColumns }: { settings: SiteSettings; columns?: FooterColumn[] }) {
   const year = new Date().getFullYear();
   // Offices still holding [placeholder] text are hidden until real details are added.
   const offices = settings.offices.filter((o) => ![o.region, o.phone, ...o.lines].some((l) => l.includes("[")));

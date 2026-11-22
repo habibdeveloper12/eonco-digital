@@ -1,7 +1,6 @@
-import { homeFaqs } from "@/content/faq";
-import { industries } from "@/content/misc";
-import { services } from "@/content/services";
+import { homeFaqs as defaultFaqs } from "@/content/faq";
 import { site } from "@/content/site";
+import { getIndustries, getServices } from "@/lib/cms";
 import { getPosts, getProjects, getSiteSettings } from "@/lib/wordpress";
 
 export const revalidate = 3600;
@@ -12,7 +11,13 @@ export const revalidate = 3600;
  * Generated from the same data as the site, so it never goes stale.
  */
 export async function GET() {
-  const [settings, projects, posts] = await Promise.all([getSiteSettings(), getProjects(), getPosts()]);
+  const [settings, allProjects, allPosts, allServices, allIndustries] = await Promise.all([getSiteSettings(), getProjects(), getPosts(), getServices(), getIndustries()]);
+  // Items set to "Hide from search engines" in WordPress are left out.
+  const projects = allProjects.filter((c) => !c.seo?.noindex);
+  const posts = allPosts.filter((p) => !p.seo?.noindex);
+  const services = allServices.filter((s) => !s.seo?.noindex);
+  const industries = allIndustries.filter((i) => !i.seo?.noindex);
+  const homeFaqs = settings.home.faqs?.length ? settings.home.faqs : defaultFaqs;
   const fmt = (p: string) => (/custom/i.test(p) ? "custom quote" : `from ${p.replace("+", "")}${/\/mo/.test(p) ? "" : " per project"}`);
 
   const body = `# ${site.name}
@@ -28,7 +33,7 @@ ${site.name} is a HubSpot-focused growth agency serving growing companies in Aus
 
 ## Services
 
-${services.map((s) => `- [${s.name}](${site.url}/${s.slug}): ${s.blurb} Starter package ${fmt(s.packages[0].price)} (${s.packages[0].timeline.replace("Timeline: ", "").toLowerCase()}).`).join("\n")}
+${services.map((s) => `- [${s.name}](${site.url}/${s.slug}): ${s.blurb}${s.packages[0] ? ` Starter package ${fmt(s.packages[0].price)} (${s.packages[0].timeline.replace("Timeline: ", "").toLowerCase()}).` : ""}`).join("\n")}
 
 ## Industries
 

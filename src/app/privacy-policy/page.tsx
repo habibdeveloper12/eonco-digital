@@ -1,9 +1,21 @@
 import type { Metadata } from "next";
+import { CmsPageView } from "@/components/pages/CmsPageView";
 import { PageHero } from "@/components/pages/PageHero";
+import { getPage } from "@/lib/cms";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Privacy Policy", alternates: { canonical: "/privacy-policy" } };
+export const revalidate = 300;
+const SLUG = "privacy-policy";
 
-export default function Page() {
+export async function generateMetadata(): Promise<Metadata> {
+  const p = await getPage(SLUG);
+  return pageMetadata({ title: p?.title || "Privacy Policy", description: p?.excerpt, path: `/${SLUG}`, seo: p?.seo });
+}
+
+/** Uses WordPress → Pages → "Privacy Policy" (slug privacy-policy) when it is published. */
+export default async function Page() {
+  const p = await getPage(SLUG);
+  if (p) return <CmsPageView page={p} updated cta={false} />;
   return (
     <>
       <PageHero centered title="Privacy Policy" text="Last updated: [date]" />

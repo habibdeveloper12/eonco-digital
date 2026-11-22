@@ -16,7 +16,7 @@ import zlib from "node:zlib";
 const root = path.resolve(import.meta.dirname, "..");
 const src = path.join(root, "wordpress", "eonco-headless");
 const outDir = path.join(root, "public", "wp-plugin");
-const site = (process.env.NEXT_PUBLIC_SITE_URL || "https://eoncodigital.com").replace(/\/+$/, "");
+const site = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.eoncodigital.com").replace(/\/+$/, "");
 
 const main = fs.readFileSync(path.join(src, "eonco-headless.php"), "utf8");
 const version = main.match(/^\s*\*\s*Version:\s*([0-9.]+)/m)?.[1];

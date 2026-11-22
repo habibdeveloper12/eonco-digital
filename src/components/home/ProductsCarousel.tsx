@@ -4,13 +4,13 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { themes } from "@/content/misc";
+import { themes as localThemes, type Product } from "@/content/misc";
+import { ThemeShot } from "../pages/ThemeShot";
 import { Eyebrow } from "../ui/Eyebrow";
 import { Reveal } from "../ui/Reveal";
 import { cn } from "../ui/cn";
-import { SiteMock } from "../visuals/Mockups";
 
-export function ProductsCarousel() {
+export function ProductsCarousel({ themes = localThemes }: { themes?: Product[] }) {
   const [[index, dir], setState] = useState<[number, number]>([0, 1]);
   const [paused, setPaused] = useState(false);
   const reduce = useReducedMotion();
@@ -95,7 +95,7 @@ export function ProductsCarousel() {
                       <span className="size-2 rounded-full bg-[#28c840]" />
                     </div>
                     <div className="aspect-[524/340]">
-                      <SiteMock palette={t.palette} headline={t.headline} variant={index} />
+                      <ThemeShot t={t} variant={index} />
                     </div>
                   </div>
                 </div>

@@ -29,21 +29,30 @@ export type Testimonial = { quote: string; name: string; role: string; featured?
 type WPRendered = { rendered: string };
 type WPMedia = { source_url?: string; alt_text?: string };
 type WPTerm = { name: string; taxonomy: string };
-type WPItem = {
+export type WPItem = {
   id: number;
   slug: string;
   date: string;
+  modified?: string;
   title: WPRendered;
   excerpt?: WPRendered;
   content?: WPRendered;
   meta?: Record<string, unknown>;
+  menu_order?: number;
+  /** Added by Yoast SEO when it is installed. */
+  yoast_head_json?: { description?: string; og_image?: { url?: string }[]; robots?: { index?: string } };
   _embedded?: { "wp:featuredmedia"?: WPMedia[]; "wp:term"?: WPTerm[][] };
 };
 
-async function wpGet(path: string): Promise<WPItem[] | null> {
+export async function wpGet(path: string): Promise<WPItem[] | null> {
   if (!WP) return null;
   try {
     const res = await fetch(`${WP}/wp-json/wp/v2/${path}`, { next: { revalidate: 300, tags: [WP_TAG] } });
+    if (res.status === 404) {
+      // The content type is not registered: the Eonco Headless plugin is older than this website.
+      console.warn(`[wordpress] /${path.split("?")[0]} not found (update the Eonco Headless plugin), using built-in content`);
+      return null;
+    }
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     return (await res.json()) as WPItem[];
   } catch (err) {
@@ -65,11 +74,11 @@ export const plain = (html = "") =>
     .replace(/\s+/g, " ")
     .trim();
 
-const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
-const list = (v: unknown, sep: RegExp = /,/) => str(v).split(sep).map((s) => s.trim()).filter(Boolean);
-const paragraphs = (v: unknown) => list(v, /\n\s*\n|\r?\n/);
+export const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+export const list = (v: unknown, sep: RegExp = /,/) => str(v).split(sep).map((s) => s.trim()).filter(Boolean);
+export const paragraphs = (v: unknown) => list(v, /\n\s*\n|\r?\n/);
 /** Featured image URL, only when it lives in this WordPress media library (see images.remotePatterns in next.config). */
-const image = (it: WPItem) => {
+export const image = (it: WPItem) => {
   const src = it._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
   if (!src || !WP) return undefined;
   try {
@@ -79,8 +88,40 @@ const image = (it: WPItem) => {
     return undefined;
   }
 };
+export const imageAlt = (it: WPItem) => str(it._embedded?.["wp:featuredmedia"]?.[0]?.alt_text) || undefined;
 const terms = (it: WPItem, taxonomy: string) => (it._embedded?.["wp:term"] ?? []).flat().filter((t) => t.taxonomy === taxonomy).map((t) => plain(t.name));
 const readTime = (html: string) => `${Math.max(1, Math.round(plain(html).split(" ").length / 220))} min read`;
+
+/** Search-engine fields an editor can set on any WordPress item (SEO box in the editor). */
+export type Seo = { title?: string; description?: string; image?: string; noindex?: boolean };
+
+/**
+ * Reads the "Search & social" box from the Eonco plugin. When Yoast SEO is
+ * installed its description, image and noindex are used as a fallback.
+ */
+export function seoOf(it: WPItem): Seo {
+  const m = it.meta ?? {};
+  const y = it.yoast_head_json;
+  return {
+    title: str(m.eonco_seo_title) || undefined,
+    description: str(m.eonco_seo_description) || str(y?.description) || undefined,
+    image: str(m.eonco_seo_image) || str(y?.og_image?.[0]?.url) || undefined,
+    noindex: Boolean(m.eonco_noindex) || y?.robots?.index === "noindex",
+  };
+}
+
+/** Fetch a single JSON document from a custom WordPress route (eonco/v1/...). */
+export async function wpJson<T>(path: string): Promise<T | null> {
+  if (!WP) return null;
+  try {
+    const res = await fetch(`${WP}/wp-json/${path}`, { next: { revalidate: 300, tags: [WP_TAG] } });
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    return (await res.json()) as T;
+  } catch (err) {
+    console.error(`[wordpress] ${path} failed, using local content:`, err);
+    return null;
+  }
+}
 
 /** Rotating brand-safe palettes for posts without a featured image. */
 const postPalettes: Post["palette"][] = [
@@ -94,7 +135,7 @@ const postPalettes: Post["palette"][] = [
 /* Blog posts                                                           */
 /* ------------------------------------------------------------------ */
 
-export type BlogPost = Post & { html?: string; image?: string };
+export type BlogPost = Post & { html?: string; image?: string; imageAlt?: string; modified?: string; seo?: Seo };
 
 export async function getPosts(): Promise<BlogPost[]> {
   // WordPress's own sample post ("Hello world!") is never shown.
@@ -108,12 +149,15 @@ export async function getPosts(): Promise<BlogPost[]> {
       title: plain(it.title.rendered),
       category: terms(it, "category").find((c) => c !== "Uncategorized") ?? "Insights",
       date: it.date,
+      modified: it.modified,
       readTime: readTime(html),
       excerpt: plain(it.excerpt?.rendered).replace(/\s*\[(…|\.\.\.)\]\s*$/, "…"),
       palette: postPalettes[i % postPalettes.length],
       body: [],
       html,
       image: image(it),
+      imageAlt: imageAlt(it),
+      seo: seoOf(it),
     };
   });
 }
@@ -126,18 +170,16 @@ export async function getPost(slug: string) {
 /* Case studies ("Projects" in the WordPress dashboard)                 */
 /* ------------------------------------------------------------------ */
 
-export type Project = CaseStudy & { image?: string; featured?: boolean };
-
-const industries: IndustrySlug[] = ["professional-services", "healthcare", "ecommerce", "construction", "saas", "education"];
+export type Project = CaseStudy & { image?: string; featured?: boolean; modified?: string; seo?: Seo };
 
 function toProject(it: WPItem): Project {
   const m = it.meta ?? {};
-  const industry = str(m.eonco_industry) as IndustrySlug;
+  const industry: IndustrySlug = str(m.eonco_industry) || "professional-services";
   return {
     slug: it.slug,
     client: str(m.eonco_client) || plain(it.title.rendered).split(" ").slice(0, 2).join(" "),
     title: plain(it.title.rendered),
-    industry: industries.includes(industry) ? industry : "professional-services",
+    industry,
     tags: list(m.eonco_tags),
     summary: plain(it.excerpt?.rendered),
     palette: [str(m.eonco_color_bg) || "#0a2035", str(m.eonco_color_accent) || "#dc1f36", str(m.eonco_color_ink) || "#ffffff"],
@@ -155,6 +197,8 @@ function toProject(it: WPItem): Project {
     stack: list(m.eonco_stack),
     image: image(it),
     featured: Boolean(m.eonco_featured),
+    modified: it.modified || it.date,
+    seo: seoOf(it),
   };
 }
 
@@ -195,9 +239,21 @@ export type SiteSettings = {
   offices: { region: string; lines: string[]; phone: string }[];
   stats: Stat[];
   why: WhyStat[];
+  /** Homepage hero and FAQ. Empty values keep the built-in copy. */
+  home: { heroLines?: string[]; heroText?: string; title?: string; description?: string; faqs?: { q: string; a: string }[] };
+  /** Site-wide defaults for search engines and social sharing. */
+  seo: { title?: string; description?: string; image?: string };
 };
 
 type WPSettings = {
+  hero_lines?: string;
+  hero_text?: string;
+  home_title?: string;
+  home_description?: string;
+  faqs?: { q?: string; a?: string }[];
+  seo_title?: string;
+  seo_description?: string;
+  seo_image?: string;
   email?: string;
   phone?: string;
   partner_label?: string;
@@ -224,6 +280,8 @@ const localSettings: SiteSettings = {
   offices: site.offices.map((o) => ({ ...o, lines: [...o.lines] })),
   stats: localStats.whoWeAre,
   why: localStats.why,
+  home: {},
+  seo: {},
 };
 
 /** Company details and homepage figures. Empty WordPress fields keep the built-in values. */
@@ -265,6 +323,14 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     offices: offices.length ? offices : localSettings.offices,
     stats: stats.length ? stats : localSettings.stats,
     why: why.length ? why : localSettings.why,
+    home: {
+      heroLines: list(s.hero_lines, /\r?\n/).slice(0, 4),
+      heroText: str(s.hero_text) || undefined,
+      title: str(s.home_title) || undefined,
+      description: str(s.home_description) || undefined,
+      faqs: (s.faqs ?? []).map((f) => ({ q: str(f.q), a: str(f.a) })).filter((f) => f.q && f.a),
+    },
+    seo: { title: str(s.seo_title) || undefined, description: str(s.seo_description) || undefined, image: str(s.seo_image) || undefined },
   };
 }
 

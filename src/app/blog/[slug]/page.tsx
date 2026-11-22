@@ -6,6 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import { ConsultCta } from "@/components/home/ConsultCta";
 import { site } from "@/content/site";
 import { Breadcrumbs, JsonLd } from "@/components/seo/JsonLd";
+import { RichContent } from "@/components/pages/RichContent";
+import { pageMetadata } from "@/lib/seo";
 import { getPost, getPosts } from "@/lib/wordpress";
 
 export const revalidate = 300;
@@ -15,9 +17,7 @@ export const generateStaticParams = async () => (await getPosts()).map((p) => ({
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const p = await getPost((await params).slug);
-  return p
-    ? { title: p.title, description: p.excerpt, alternates: { canonical: `/blog/${p.slug}` }, openGraph: { type: "article", title: p.title, description: p.excerpt, publishedTime: p.date, images: p.image ? [p.image] : undefined } }
-    : {};
+  return p ? pageMetadata({ title: p.title, description: p.excerpt, path: `/blog/${p.slug}`, image: p.image, seo: p.seo, type: "article", publishedTime: p.date, modifiedTime: p.modified }) : {};
 }
 
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -41,13 +41,13 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         {p.image && (
           <div className="mx-auto max-w-[980px] px-5 pt-10">
             <div className="relative aspect-[16/9] overflow-hidden rounded-[20px]">
-              <Image src={p.image} alt="" fill priority sizes="(min-width: 1024px) 940px, 100vw" className="object-cover" />
+              <Image src={p.image} alt={p.imageAlt ?? ""} fill priority sizes="(min-width: 1024px) 940px, 100vw" className="object-cover" />
             </div>
           </div>
         )}
         {p.html ? (
           // Content written by the team in the WordPress editor.
-          <div className="prose-y mx-auto max-w-[780px] px-5 py-14" dangerouslySetInnerHTML={{ __html: p.html }} />
+          <RichContent html={p.html} className="mx-auto max-w-[780px] px-5 py-14" />
         ) : (
           <div className="prose-y mx-auto max-w-[780px] px-5 py-14">
             {p.body.map((b, i) =>
@@ -73,9 +73,9 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           "@context": "https://schema.org",
           "@type": "BlogPosting",
           headline: p.title,
-          description: p.excerpt,
+          description: p.seo?.description || p.excerpt,
           datePublished: p.date,
-          dateModified: p.date,
+          dateModified: p.modified ?? p.date,
           ...(p.image && { image: p.image }),
           articleSection: p.category,
           mainEntityOfPage: `${site.url}/blog/${p.slug}`,

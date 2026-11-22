@@ -12,22 +12,34 @@ import { WhyUs } from "@/components/home/WhyUs";
 import { LogoWall } from "@/components/home/LogoWall";
 import { HomeFaq } from "@/components/home/HomeFaq";
 import { ConsultCta } from "@/components/home/ConsultCta";
+import { getThemes } from "@/lib/cms";
 import { getFeaturedProjects, getSiteSettings, getTestimonials } from "@/lib/wordpress";
 
-export const metadata: Metadata = {
-  title: { absolute: "Eonco Digital | HubSpot Implementation, Integration & Website Agency" },
-  description:
-    "HubSpot agency for growing teams in Australia, the US, the UK and Europe. CRM implementation from $2,000, integrations, migrations, HubSpot websites and outbound, built and supported by one team.",
-  alternates: { canonical: "/" },
-};
+const defaultTitle = "Eonco Digital | HubSpot Implementation, Integration & Website Agency";
+const defaultDescription =
+  "HubSpot agency for growing teams in Australia, the US, the UK and Europe. CRM implementation from $2,000, integrations, migrations, HubSpot websites and outbound, built and supported by one team.";
+
+/** Title and description can be changed in WordPress → Settings → Eonco Company Details → Homepage. */
+export async function generateMetadata(): Promise<Metadata> {
+  const { home, seo } = await getSiteSettings();
+  const title = home.title || defaultTitle;
+  const description = home.description || defaultDescription;
+  return {
+    title: { absolute: title },
+    description,
+    alternates: { canonical: "/" },
+    openGraph: { title, description, url: "/", ...(seo.image && { images: [seo.image] }) },
+    twitter: { title, description, ...(seo.image && { images: [seo.image] }) },
+  };
+}
 
 export const revalidate = 300;
 
 export default async function Home() {
-  const [cases, testimonials, settings] = await Promise.all([getFeaturedProjects(), getTestimonials(), getSiteSettings()]);
+  const [cases, testimonials, settings, themes] = await Promise.all([getFeaturedProjects(), getTestimonials(), getSiteSettings(), getThemes()]);
   return (
     <>
-      <Hero label={settings.partnerLabel} />
+      <Hero label={settings.partnerLabel} lines={settings.home.heroLines} text={settings.home.heroText} />
       <WhoWeAre figures={settings.stats} />
       <ServicesStack />
       <WebsiteShowcase />
@@ -35,10 +47,10 @@ export default async function Home() {
       <ServicesPricing />
       <FeaturedCases cases={cases} />
       <Testimonials featured={testimonials.featured} list={testimonials.list} />
-      <ProductsCarousel />
+      <ProductsCarousel themes={themes} />
       <WhyUs cards={settings.why} />
       <LogoWall />
-      <HomeFaq />
+      <HomeFaq items={settings.home.faqs} />
       <ConsultCta />
     </>
   );

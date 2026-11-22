@@ -1,4 +1,4 @@
-import { homeFaqs } from "@/content/faq";
+import { homeFaqs as defaultFaqs } from "@/content/faq";
 import { Faq } from "../pages/Faq";
 import { JsonLd } from "../seo/JsonLd";
 import { Eyebrow } from "../ui/Eyebrow";
@@ -6,7 +6,9 @@ import { Reveal } from "../ui/Reveal";
 import { SplitText } from "../ui/SplitText";
 
 /** Answer-first FAQ with FAQPage structured data (featured snippets and AI answers). */
-export function HomeFaq() {
+/** Questions can be replaced in WordPress → Settings → Eonco Company Details → Homepage FAQ. */
+export function HomeFaq({ items }: { items?: { q: string; a: string }[] }) {
+  const homeFaqs = items?.length ? items : defaultFaqs;
   return (
     <section className="bg-white py-[88px] lg:py-[104px]">
       <div className="container-x gutter grid gap-10 lg:grid-cols-[400px_1fr] lg:gap-16">

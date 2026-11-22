@@ -4,6 +4,7 @@ import { ArrowRight, CalendarDays, Check, FileText, Mail } from "lucide-react";
 import { ContactForm } from "@/components/pages/ContactForm";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
+import { getServices } from "@/lib/cms";
 import { getSiteSettings } from "@/lib/wordpress";
 
 export const revalidate = 300;
@@ -22,7 +23,7 @@ const getRoutes = (email: string) => [
 ];
 
 export default async function ContactPage() {
-  const { email } = await getSiteSettings();
+  const [{ email }, services] = await Promise.all([getSiteSettings(), getServices()]);
   const routes = getRoutes(email);
   return (
     <>
@@ -64,6 +65,7 @@ export default async function ContactPage() {
 
           <Reveal delay={0.1}>
             <ContactForm
+              services={services.map(({ slug, name }) => ({ slug, name }))}
               heading={
                 <>
                   <h2 className="font-display text-[28px] font-medium leading-[1.15] text-navy">Send us a message</h2>

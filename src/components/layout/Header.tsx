@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Search } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { navigation } from "@/content/navigation";
+import { navigation as defaultNavigation, type NavItem } from "@/content/navigation";
+import type { SearchEntry } from "@/lib/searchIndex";
 import { Logo } from "../visuals/Logo";
 import { cn } from "../ui/cn";
 import { usePresence } from "../ui/usePresence";
@@ -12,7 +13,8 @@ import { MegaPanel } from "./MegaMenu";
 import { MobileNav } from "./MobileNav";
 import { SearchDialog } from "./SearchDialog";
 
-export function Header() {
+/** Menus and search are built on the server from WordPress content (see app/layout.tsx). */
+export function Header({ navigation = defaultNavigation, searchIndex }: { navigation?: NavItem[]; searchIndex?: SearchEntry[] }) {
   const pathname = usePathname();
   const [open, setOpen] = useState<number | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -170,8 +172,8 @@ export function Header() {
         />
       )}
 
-      <MobileNav open={mobile} onClose={() => setMobile(false)} onSearch={() => setSearch(true)} />
-      <SearchDialog open={search} onClose={() => setSearch(false)} />
+      <MobileNav navigation={navigation} open={mobile} onClose={() => setMobile(false)} onSearch={() => setSearch(true)} />
+      <SearchDialog index={searchIndex} open={search} onClose={() => setSearch(false)} />
     </>
   );
 }

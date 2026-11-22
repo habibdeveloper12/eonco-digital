@@ -2,7 +2,7 @@
 
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { services } from "@/content/services";
+import { services as localServices } from "@/content/services";
 import { cn } from "../ui/cn";
 
 type Kind = "contact" | "project";
@@ -17,8 +17,11 @@ export function ContactForm({
   defaultService,
   heading,
   footer,
+  services = localServices,
 }: {
   kind?: Kind;
+  /** Service options (from WordPress when connected). */
+  services?: { slug: string; name: string }[];
   defaultService?: string;
   /** Optional title block rendered inside the card, above the fields. */
   heading?: React.ReactNode;

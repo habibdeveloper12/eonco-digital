@@ -2,12 +2,21 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
-import { industries } from "@/content/misc";
+import { industries as localIndustries } from "@/content/misc";
 import type { Project } from "@/lib/wordpress";
 import { cn } from "../ui/cn";
 import { CaseTile } from "./CaseTile";
 
-export function CaseFilter({ cases: caseStudies, initial = "all" }: { cases: Project[]; initial?: string }) {
+export function CaseFilter({
+  cases: caseStudies,
+  initial = "all",
+  industries = localIndustries,
+}: {
+  cases: Project[];
+  initial?: string;
+  /** Industry names for the filter tabs (from WordPress when connected). */
+  industries?: { slug: string; name: string }[];
+}) {
   const [f, setF] = useState(initial);
   if (!caseStudies.length) return <p className="py-20 text-center text-[17px] text-body">New projects are on their way. Check back soon.</p>;
   const list = f === "all" ? caseStudies : caseStudies.filter((c) => c.industry === f);

@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { ArrowRight, ChevronDown, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { navigation } from "@/content/navigation";
+import { navigation as defaultNavigation, type NavItem } from "@/content/navigation";
 import { Icon } from "../ui/Icon";
 import { cn } from "../ui/cn";
 import { usePresence } from "../ui/usePresence";
 import { Logo } from "../visuals/Logo";
 
-export function MobileNav({ open, onClose, onSearch }: { open: boolean; onClose: () => void; onSearch: () => void }) {
+export function MobileNav({ open, onClose, onSearch, navigation = defaultNavigation }: { open: boolean; onClose: () => void; onSearch: () => void; navigation?: NavItem[] }) {
   const [expanded, setExpanded] = useState<number | null>(null);
   const { mounted, shown } = usePresence(open, 300);
 

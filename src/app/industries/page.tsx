@@ -5,11 +5,13 @@ import { ConsultCta } from "@/components/home/ConsultCta";
 import { PageHero } from "@/components/pages/PageHero";
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
-import { industries } from "@/content/misc";
+import { getIndustries } from "@/lib/cms";
 
+export const revalidate = 300;
 export const metadata: Metadata = { title: "HubSpot by Industry", description: "How Eonco Digital sets up HubSpot for professional services, healthcare, ecommerce, construction, SaaS and education.", alternates: { canonical: "/industries" } };
 
-export default function IndustriesPage() {
+export default async function IndustriesPage() {
+  const industries = await getIndustries();
   return (
     <>
       <PageHero centered eyebrow="Industries" title={<>HubSpot, Built for <span className="text-brand">Your Industry</span></>} text="Every industry sells, serves and reports differently. We configure HubSpot around the way yours works." />

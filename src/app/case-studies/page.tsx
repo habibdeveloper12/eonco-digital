@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ConsultCta } from "@/components/home/ConsultCta";
 import { CaseFilter } from "@/components/pages/CaseFilter";
 import { PageHero } from "@/components/pages/PageHero";
+import { getIndustries } from "@/lib/cms";
 import { getProjects } from "@/lib/wordpress";
 
 export const metadata: Metadata = {
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function CaseStudiesPage() {
-  const cases = await getProjects();
+  const [cases, industries] = await Promise.all([getProjects(), getIndustries()]);
   return (
     <>
       <PageHero
@@ -28,7 +29,7 @@ export default async function CaseStudiesPage() {
       />
       <section className="py-[80px]">
         <div className="container-x gutter">
-          <CaseFilter cases={cases} />
+          <CaseFilter cases={cases} industries={industries.map(({ slug, name }) => ({ slug, name }))} />
         </div>
       </section>
       <ConsultCta />

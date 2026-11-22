@@ -6,9 +6,10 @@ import { ConsultCta } from "@/components/home/ConsultCta";
 import { CaseTile } from "@/components/pages/CaseTile";
 import { ProjectVisual } from "@/components/pages/ProjectVisual";
 import { Reveal } from "@/components/ui/Reveal";
-import { getIndustry } from "@/content/misc";
 import { Breadcrumbs, JsonLd } from "@/components/seo/JsonLd";
 import { site } from "@/content/site";
+import { getIndustry } from "@/lib/cms";
+import { pageMetadata } from "@/lib/seo";
 import { getProject, getProjects } from "@/lib/wordpress";
 
 export const revalidate = 300;
@@ -19,7 +20,7 @@ export const generateStaticParams = async () => (await getProjects()).map((c) =>
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const c = await getProject((await params).slug);
   if (!c) return {};
-  return { title: c.title, description: c.summary, alternates: { canonical: `/case-studies/${c.slug}` }, openGraph: { type: "article", title: c.title, description: c.summary, images: c.image ? [c.image] : undefined } };
+  return pageMetadata({ title: c.title, description: c.summary, path: `/case-studies/${c.slug}`, image: c.image, seo: c.seo, type: "article", modifiedTime: c.modified });
 }
 
 function Block({ title, items }: { title: string; items: string[] }) {
@@ -42,7 +43,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
   const slug = (await params).slug;
   const [c, all] = await Promise.all([getProject(slug), getProjects()]);
   if (!c) notFound();
-  const ind = getIndustry(c.industry);
+  const ind = await getIndustry(c.industry);
   const more = all.filter((x) => x.slug !== c.slug).slice(0, 3);
   return (
     <>

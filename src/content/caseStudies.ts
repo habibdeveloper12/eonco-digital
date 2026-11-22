@@ -21,13 +21,8 @@ export type CaseStudy = {
   stack: string[];
 };
 
-export type IndustrySlug =
-  | "professional-services"
-  | "healthcare"
-  | "ecommerce"
-  | "construction"
-  | "saas"
-  | "education";
+/** Industry slugs. The built-in six are below; more can be added in WordPress → Industries. */
+export type IndustrySlug = string;
 
 export const caseStudies: CaseStudy[] = [
   {

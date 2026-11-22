@@ -1,108 +1,159 @@
-# Managing website content from WordPress
+# Managing the website from WordPress
 
-The Eonco Digital website reads its **blog posts**, **projects (case studies)** and **testimonials** from your WordPress dashboard. Your team writes and publishes in WordPress, and the website updates within seconds. No code, no rebuilds.
+WordPress is the dashboard for the Eonco Digital website. Your team edits in WordPress, and the website (Next.js) updates within seconds. No code and no rebuilds.
 
-Everything else (services, pricing, pages and design) lives in the website code.
+| In WordPress | On the website |
+|---|---|
+| **Services** | Every service page, e.g. `/hubspot-migration`, plus the menus |
+| **Industries** | `/industries` and `/industries/{slug}`, the case-study filter and menus |
+| **HubSpot Themes** | `/hubspot-themes`, theme pages and the homepage carousel |
+| **Pages** | Any new page at `/{slug}` (e.g. `/careers`), plus Privacy Policy and Terms |
+| **Posts** | `/blog` |
+| **Projects** | `/case-studies` and the homepage showcase |
+| **Testimonials** | Homepage quotes |
+| **Settings → Eonco Company Details** | Contact details, offices, socials, homepage headline, homepage figures, homepage FAQ, default SEO |
+
+Still in the website code: the About page, the page layouts and design, the HubSpot Modules and Apps lists, and the homepage section headings.
 
 ---
 
-## One-time setup (about 15 minutes)
+## One-time setup
 
-### 1. Install the plugin in WordPress
+### 1. Install or update the plugin
 
-1. Use the ready-made file `wordpress/eonco-headless.zip` from this project. Don't re-zip the folder with PowerShell's `Compress-Archive`. It writes Windows-style paths that make WordPress say *"Plugin file does not exist"*.
-2. In WordPress, go to **Plugins → Add New → Upload Plugin**, choose the zip and click **Install Now**, then **Activate**.
-   - If an earlier upload failed, first delete the broken copy under **Plugins** (or remove `wp-content/plugins/eonco-headless` with your host's file manager), then upload again.
-3. You will see two new menu items: **Projects** and **Testimonials**.
+- **Already installed?** It updates itself to version 1.3 after the website is deployed. To speed that up, go to **Dashboard → Updates → Check again**.
+- **New install:** go to **Plugins → Add New → Upload Plugin** and choose `wordpress/eonco-headless.zip`, then **Activate**. Don't re-zip the folder with PowerShell's `Compress-Archive`. It writes Windows-style paths that make WordPress say *"Plugin file does not exist"*.
 
-### Plugin updates are automatic (no more uploads)
+After updating, go to **Settings → Permalinks** and click **Save** once. This registers the new Services, Industries and HubSpot Themes sections.
 
-From version 1.2 the plugin updates itself. Every time the website is deployed, it publishes the latest plugin at `/wp-plugin/`. WordPress checks that address (based on **Settings → Eonco Website → Website URL**) and installs new versions automatically. You only ever upload the zip once.
-
-- To check manually: **Dashboard → Updates → Check again**.
-- For developers: to ship a plugin change, edit `wordpress/eonco-headless/eonco-headless.php`, raise `Version:` and `VERSION` in that file, and deploy. `npm run build` repackages it (`npm run plugin:build` does it on its own).
-
-### 2. Make the WordPress API readable
-
-Go to **Settings → Permalinks**, choose **Post name** and click **Save**. Then open `https://YOUR-WORDPRESS-SITE/wp-json/wp/v2/posts` in a browser. If you see text that starts with `[{"id":`, it works.
-
-### 3. Connect the website (Vercel)
-
-In Vercel: **Project → Settings → Environment Variables**, add:
+### 2. Website environment variables (Vercel → Project → Settings → Environment Variables)
 
 | Name | Value |
 |---|---|
 | `WORDPRESS_URL` | Your WordPress address, e.g. `https://cms.eoncodigital.com` (no slash at the end) |
-| `REVALIDATE_SECRET` | A long random password, e.g. from a password generator |
+| `REVALIDATE_SECRET` | A long random password |
+| `NEXT_PUBLIC_SITE_URL` | `https://www.eoncodigital.com` |
 
-Then **redeploy** the project once.
+Redeploy once after changing them.
 
-### 4. Connect WordPress back to the website
+### 3. Connect WordPress to the website
 
-In WordPress: **Settings → Eonco Website**
+In WordPress, go to **Settings → Eonco Website**:
 
-- **Website URL**: the live website address, e.g. `https://eoncodigital.com`
-- **Refresh secret**: the same `REVALIDATE_SECRET` value from step 3
+- **Website URL**: `https://www.eoncodigital.com`
+- **Refresh secret**: the same value as `REVALIDATE_SECRET`
+- **Search engines**: keep *"Hide this WordPress site from Google"* ticked
 
-Click **Save**, then **Test connection**. You should see *"Connected. The website refreshed successfully."*
+Click **Save**, then **Test connection**.
 
-> If your WordPress site is still your current public website, leave **"Send visitors … to the website"** switched off until the new site is live.
+### 4. Import the website's current content (important)
+
+On the same page, click **Import website content**. It copies everything the website shows today into WordPress (16 services, industries, themes, blog posts, homepage headline and FAQ, and draft legal pages), so you edit instead of starting from blank.
+
+> **Do this before you publish your first service, industry or theme.** As soon as one item of a type is published in WordPress, WordPress becomes the master list for that type. Anything not published there disappears from the website. Running the import first means nothing disappears.
+
+The import never overwrites anything that already exists, so it is safe to run again.
 
 ---
 
-## Day-to-day: what your team does
+## Day-to-day editing
 
-### Blog posts → `/blog`
+### Services
 
-Use **Posts → Add New** as normal.
+Go to **Services → (choose one)**.
 
-- **Title**, **content** (the normal editor, with headings, images, lists and quotes) and **Excerpt** (the summary shown on cards).
-- **Category**: the first category (other than *Uncategorized*) is shown as the post's label.
-- **Featured image**: used as the cover. Without one, the site draws a branded cover.
+- **Title**: the name in menus and cards.
+- **Excerpt** (sidebar): the one-line summary on cards and in the menu.
+- **Featured image**: the picture at the top of the page. Without one, the site draws an illustration.
+- **Main editor**: long-form content, shown as an "in depth" section after the overview. Use it for SEO (see below).
+- **Order** (sidebar → *Page attributes*): the position in the menu.
+- **Service page content** box: headline, overview, cards, comparison table, process, 3 packages and FAQs. **Any empty field keeps the website's current text.**
 
-### Projects (case studies) → `/case-studies`
+  Lists are written one item per line, as `Title | Text`. For example:
 
-Use **Projects → Add project**.
+  ```
+  Salesforce to HubSpot | Objects, history and automation rebuilt natively.
+  Zoho to HubSpot | Modules, notes and attachments mapped cleanly.
+  ```
 
-| Field | What to write |
+- **New service**: go to **Services → Add service**. Its address is the slug, e.g. *hubspot-audit* becomes `/hubspot-audit`. It appears in the menu automatically.
+- **Remove a service**: switch it to Draft or move it to Trash.
+
+### Industries and HubSpot Themes
+
+These work the same way as Services. For a theme, upload a screenshot as the **Featured image** to replace the drawn mockup. You can also add a **Buy link** (e.g. its HubSpot Marketplace listing).
+
+### Pages
+
+Use **Pages → Add New** as normal. The page appears at `/{slug}`.
+
+- A page with the slug `privacy-policy` or `terms-and-conditions` replaces the website's template text.
+- Slugs that already have a designed page (about, contact, blog, case-studies, industries and others) can't be replaced this way.
+
+### Blog posts, Projects, Testimonials
+
+These work as before. Only publish projects and quotes the client has approved.
+
+### Homepage
+
+Go to **Settings → Eonco Company Details**. You can edit:
+
+- the headline (one line per row; the last line is shown in red)
+- the intro text
+- the Google title and description
+- up to 10 FAQ questions
+- the figures
+- the offices
+- the social links
+
+---
+
+## SEO & AI answers (AEO)
+
+Every service, industry, theme, page, post and project has a **Search & social** box:
+
+| Field | Tip |
 |---|---|
-| Title | e.g. *Patient Lifecycle Automation for a Multi-Site Clinic Group* |
-| Excerpt | One-sentence summary |
-| Featured image | A screenshot of the work (optional; without it the site draws a mockup in the colours you pick) |
-| Client name | Short name shown on hover. Use an anonymised name if the client has not approved theirs |
-| Industry | Used for the filter on the Case Studies page |
-| Tags | Comma separated: `Healthcare, Service Hub, Automation` |
-| Results | One per line, as `value | label`, e.g. `38% | Faster enquiry response` |
-| The challenge / What we built / The outcome | One paragraph per line |
-| Tools & stack | Comma separated |
-| Feature on homepage | Tick for up to 6 projects to show in the homepage showcase |
+| Search title | About 60 characters, main phrase first: *HubSpot Migration Services \| Zero Data Loss*. "\| Eonco Digital" is added automatically. |
+| Search description | 120 to 155 characters. Say what you offer and who it is for. |
+| Share image | 1200 × 630 px, used on LinkedIn, Facebook and X. |
+| Hide from search engines | Removes the page from Google, the sitemap and `llms.txt`. |
 
-### Testimonials → homepage
+If Yoast SEO is installed, its description, share image and noindex setting are also used when the box is empty.
 
-Use **Testimonials → Add testimonial**.
+The website handles these automatically:
 
-- **Title**: the person's name
-- **Main editor**: the quote
-- **Role & company**: e.g. *Head of Sales, Acme Logistics*
-- **Use as the large featured quote**: tick one testimonial
+- canonical URLs
+- `sitemap.xml` with real "last updated" dates
+- `robots.txt`
+- `llms.txt` for AI assistants
+- structured data: Organization, Service, FAQ, Breadcrumb, BlogPosting and Product
 
-Only publish quotes and results the client has approved.
+What ranks a page is **the content you write**:
+
+- **Long-form content:** write 800 to 1,500 words in the main editor of each service, with `##` headings that match real searches ("How much does a HubSpot migration cost?").
+- **Answer first:** answer each question in the first sentence. Google's AI Overviews, ChatGPT and Perplexity quote those sentences.
+- **Internal links:** link between related services, case studies and posts. Links you add in the editor are rewritten to the website address automatically.
+- **Images:** add alt text to every image (**Media → image → Alternative text**).
 
 ---
+
+## Good to know
+
+- **Preview:** WordPress's *Preview* button shows the WordPress theme, not the website. Publish, then check the live page with the **View** link (it opens the real website).
+- **Speed:** changes appear within a few seconds of publishing. If WordPress can't reach the website, they still appear within 5 minutes.
+- **If WordPress is down:** the website keeps showing the last published content and never goes blank.
 
 ## Who can do what
 
-Give each employee their own WordPress login (**Users → Add New**):
-
-- **Author**: can write and publish their own posts
-- **Editor**: can publish and edit everyone's posts, projects and testimonials (recommended for the marketing lead)
-- **Administrator**: everything, including plugins and settings (keep this to one or two people)
-
----
+- **Author**: writes and publishes their own posts.
+- **Editor**: everything content-related, including services, pages, projects and Company Details (recommended for the marketing lead).
+- **Administrator**: plugins, settings and the import (keep this to one or two people).
 
 ## How it works (for developers)
 
-- `src/lib/wordpress.ts` fetches from the WordPress REST API (`/wp-json/wp/v2/posts`, `/case-studies`, `/testimonials`) and maps it to the site's types. If `WORDPRESS_URL` is empty or WordPress is unreachable, it falls back to the sample content in `src/content`.
-- Pages are cached for 5 minutes. When content is published, updated or deleted, the plugin calls `POST /api/revalidate` with the `x-revalidate-secret` header, which clears the cache at once.
-- New post and project URLs work immediately (`dynamicParams = true`), with no rebuild.
-- Post content is rendered as HTML from WordPress, so only give publishing rights to people you trust.
+- `src/lib/wordpress.ts`: posts, projects, testimonials and settings. `src/lib/cms.ts`: services, industries, themes and pages. Both merge WordPress data over the built-in content in `src/content` by slug, and fall back to it when WordPress is empty or unreachable.
+- Fetches are cached for 5 minutes with the tag `wordpress`. The plugin calls `POST /api/revalidate` (header `x-revalidate-secret`) on publish, update or delete, and on settings save.
+- `GET /api/wp-export` (same secret) returns the built-in content in the plugin's format, for the import.
+- Plugin source: `wordpress/eonco-headless/`. To ship a change, raise `Version:` and `VERSION` and deploy. `npm run build` repackages it into `public/wp-plugin/`, and WordPress updates itself.
+- WordPress HTML is rendered as-is, so only give publishing rights to people you trust.

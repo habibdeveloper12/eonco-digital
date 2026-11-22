@@ -19,6 +19,13 @@ export type Service = {
   process: { title: string; text: string }[];
   packages: { name: string; price: string; unit: string; timeline: string; items: { title: string; text: string }[] }[];
   faqs: { q: string; a: string }[];
+  /** Long-form content written in the WordPress editor (HTML), shown as an "In depth" section. */
+  html?: string;
+  /** Featured image from WordPress, shown in the hero instead of the drawn illustration. */
+  image?: string;
+  imageAlt?: string;
+  seo?: import("@/lib/wordpress").Seo;
+  modified?: string;
 };
 
 type Seed = Pick<Service, "slug" | "group" | "name" | "navLabel" | "icon" | "blurb" | "heroTitle" | "heroText" | "ctaLabel"> & {
@@ -36,6 +43,11 @@ const sharedProcess = (focus: string): Service["process"] => [
   { title: "Training & Go-Live", text: "Role-based training, recorded walkthroughs and a supported launch window so adoption does not stall in week two." },
   { title: "Optimise & Support", text: "After launch we review usage and reporting, fix friction and plan the next phase with you." },
 ];
+
+/** Builds a full service page from a short seed. Also used for new services added in WordPress. */
+export function buildService(seed: Seed): Service {
+  return build(seed);
+}
 
 function build(seed: Seed): Service {
   const { focus } = seed;
