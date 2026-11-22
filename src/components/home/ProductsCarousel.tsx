@@ -112,8 +112,11 @@ export function ProductsCarousel() {
                   aria-label={`Show ${th.name}`}
                   aria-current={i === index}
                   onClick={() => setState([i, i > index ? 1 : -1])}
-                  className={cn("h-[8px] rounded-full transition-[width,background-color]", i === index ? "w-8 bg-brand" : "w-2 bg-line-2 hover:bg-muted")}
-                />
+                  className="group/dot grid h-6 min-w-6 place-items-center px-1"
+                >
+                  {/* 24px hit area around a small visual dot */}
+                  <span className={cn("block h-[8px] rounded-full transition-[width,background-color]", i === index ? "w-8 bg-brand" : "w-2 bg-line-2 group-hover/dot:bg-muted")} />
+                </button>
               ))}
             </div>
             <div className="flex gap-2">

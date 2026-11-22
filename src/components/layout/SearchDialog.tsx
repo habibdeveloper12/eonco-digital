@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUpRight, Search, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { searchIndex } from "@/lib/searchIndex";
+import { cn } from "../ui/cn";
+import { usePresence } from "../ui/usePresence";
 
 export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [q, setQ] = useState("");
   const input = useRef<HTMLInputElement>(null);
+  const { mounted, shown } = usePresence(open);
 
   useEffect(() => {
     if (open) setTimeout(() => input.current?.focus(), 50);
@@ -25,23 +27,19 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
   }, [q]);
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          className="fixed inset-0 z-[70] flex items-start justify-center bg-navy/40 p-4 pt-[12vh] backdrop-blur-sm"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+    mounted && (
+        <div
+          className={cn("fixed inset-0 z-[70] flex items-start justify-center bg-navy/40 p-4 pt-[12vh] backdrop-blur-sm transition-opacity duration-200", shown ? "opacity-100" : "opacity-0")}
           onClick={onClose}
         >
-          <motion.div
+          <div
             role="dialog"
             aria-modal="true"
             aria-label="Search"
-            initial={{ y: -20, scale: 0.98 }}
-            animate={{ y: 0, scale: 1 }}
-            exit={{ y: -10, scale: 0.98 }}
-            className="w-full max-w-[640px] overflow-hidden rounded-[20px] bg-white shadow-mega"
+            className={cn(
+              "w-full max-w-[640px] overflow-hidden rounded-[20px] bg-white shadow-mega transition-[translate,scale] duration-300 ease-[cubic-bezier(.2,.8,.2,1)]",
+              shown ? "translate-y-0 scale-100" : "-translate-y-4 scale-[0.98]",
+            )}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 border-b border-line px-5">
@@ -54,7 +52,7 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
                 ref={input}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search services, case studies, articles..."
+                placeholder="Search services, case studies and articles"
                 className="h-[64px] flex-1 bg-transparent text-[17px] text-navy outline-none placeholder:text-muted"
               />
               <button type="button" onClick={onClose} aria-label="Close search" className="grid size-9 place-items-center rounded-full hover:bg-cloud">
@@ -76,9 +74,8 @@ export function SearchDialog({ open, onClose }: { open: boolean; onClose: () => 
                 </li>
               ))}
             </ul>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </div>
+        </div>
+    )
   );
 }

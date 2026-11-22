@@ -128,7 +128,7 @@ export const posts: Post[] = [
   {
     slug: "hubspot-onboarding-checklist", title: "The HubSpot Onboarding Checklist We Use on Every Project", category: "HubSpot Onboarding", date: "2026-10-28", readTime: "8 min read",
     excerpt: "The exact discovery questions, build order and go-live checks we use to launch HubSpot portals that teams actually adopt.",
-    palette: ["#fff1f2", "#e8233a", "#001729"],
+    palette: ["#fff1f2", "#dc1f36", "#001729"],
     body: [
       { p: "Most HubSpot onboarding problems are decided before anyone opens the settings menu. This checklist is the order we work in, and why." },
       { h: "1. Map the process before the portal" },

@@ -10,9 +10,17 @@ Everything else (services, pricing, pages and design) lives in the website code.
 
 ### 1. Install the plugin in WordPress
 
-1. Zip the folder `wordpress/eonco-headless` from this project, so you have `eonco-headless.zip`.
+1. Use the ready-made file `wordpress/eonco-headless.zip` from this project. Don't re-zip the folder with PowerShell's `Compress-Archive`. It writes Windows-style paths that make WordPress say *"Plugin file does not exist"*.
 2. In WordPress, go to **Plugins → Add New → Upload Plugin**, choose the zip and click **Install Now**, then **Activate**.
+   - If an earlier upload failed, first delete the broken copy under **Plugins** (or remove `wp-content/plugins/eonco-headless` with your host's file manager), then upload again.
 3. You will see two new menu items: **Projects** and **Testimonials**.
+
+### Plugin updates are automatic (no more uploads)
+
+From version 1.2 the plugin updates itself. Every time the website is deployed, it publishes the latest plugin at `/wp-plugin/`. WordPress checks that address (based on **Settings → Eonco Website → Website URL**) and installs new versions automatically. You only ever upload the zip once.
+
+- To check manually: **Dashboard → Updates → Check again**.
+- For developers: to ship a plugin change, edit `wordpress/eonco-headless/eonco-headless.php`, raise `Version:` and `VERSION` in that file, and deploy. `npm run build` repackages it (`npm run plugin:build` does it on its own).
 
 ### 2. Make the WordPress API readable
 

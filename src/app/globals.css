@@ -6,9 +6,9 @@
    1069px narrow container, 99px pill buttons, 10 to 30px card radii.
 ------------------------------------------------------------------- */
 @theme {
-  --font-display: "Cabinet Grotesk", "Sora", ui-sans-serif, system-ui, sans-serif;
-  --font-heading: "Sora", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-cabinet), var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
 
   --color-navy: #001729;
   --color-navy-2: #012c4c;
@@ -16,7 +16,7 @@
   --color-ink: #0d1a2b;
   --color-body: #40515e;
   --color-body-2: #424a57;
-  --color-muted: #808b94;
+  --color-muted: #66727c;
   --color-subtle: #6b767f;
   --color-line: #e1e6ea;
   --color-line-2: #bfc5c9;
@@ -24,8 +24,8 @@
   --color-mist: #f0f1f5;
 
   /* Brand red (Eonco). Swap here to rebrand the whole site. */
-  --color-brand: #e8233a;
-  --color-brand-600: #c81a2f;
+  --color-brand: #dc1f36;
+  --color-brand-600: #c11a2e;
   --color-brand-700: #a31326;
   --color-brand-50: #fff1f2;
   --color-brand-100: #ffe1e4;
@@ -35,7 +35,7 @@
   --color-cream-3: #fff6f4;
   --color-sky-50: #fff3f4;
 
-  --shadow-soft: 0 10px 100px 0 rgba(1, 44, 76, 0.05);
+  --shadow-soft: 0 12px 32px -12px rgba(1, 44, 76, 0.12);
   --shadow-card: 0 3.3px 13.4px 0 rgba(1, 44, 76, 0.05);
   --shadow-mega: 0 40px 80px 0 rgba(0, 0, 0, 0.22);
 
@@ -139,6 +139,20 @@
   .mask-fade-x { mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
   .mask-fade-y { mask-image: linear-gradient(180deg, transparent, #000 10%, #000 90%, transparent); }
 }
+
+/* GSAP motion: hide only what will animate, and only until the runtime is ready
+   (see components/motion/MotionRuntime.tsx). Without JS everything is visible. */
+html.motion:not(.motion-ready) [data-reveal]:not([data-reveal="load"]) { visibility: hidden; }
+html.motion:not(.motion-ready) [data-split]:not([data-split="load"]) [data-line] { transform: translateY(105%); }
+
+/* Above-the-fold entrance runs in pure CSS from the first frame, so it never
+   waits for JavaScript and never delays Largest Contentful Paint. */
+@keyframes eonco-rise { from { opacity: 0; transform: translateY(var(--y, 24px)); } }
+@keyframes eonco-line { from { transform: translateY(105%); } }
+@keyframes eonco-panel { from { opacity: 0; transform: translateX(14px); } }
+.eonco-panel-in { animation: eonco-panel 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+[data-reveal="load"] { animation: eonco-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s) both; }
+[data-split="load"] [data-line] { animation: eonco-line 1s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s) both; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

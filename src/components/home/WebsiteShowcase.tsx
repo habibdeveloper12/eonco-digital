@@ -1,9 +1,5 @@
-"use client";
-
 import Link from "next/link";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
-import { useRef } from "react";
 import { websiteShowcase } from "@/content/caseStudies";
 import { Eyebrow } from "../ui/Eyebrow";
 import { Reveal } from "../ui/Reveal";
@@ -20,20 +16,14 @@ const backdrops = [
 ];
 
 function ShowcaseItem({ item, i }: { item: (typeof websiteShowcase)[number]; i: number }) {
-  const ref = useRef<HTMLAnchorElement>(null);
-  const reduce = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "center center"] });
-  const scale = useTransform(scrollYProgress, [0, 1], [1.12, 1]);
-  const y = useTransform(scrollYProgress, [0, 1], [40, 0]);
-
   return (
-    <Link ref={ref} href={item.href} className={`group block ${i % 2 === 1 ? "md:mt-[60px]" : ""}`}>
+    <Link href={item.href} className={`group block ${i % 2 === 1 ? "md:mt-[60px]" : ""}`}>
       <div className="relative aspect-[551/338] overflow-hidden rounded-[18px]" style={{ background: backdrops[i % backdrops.length] }}>
-        <motion.div className="absolute inset-0 flex items-center justify-center px-[13%]" style={reduce ? undefined : { scale, y }}>
+        <div data-zoom className="absolute inset-0 flex items-center justify-center px-[13%]">
           <Laptop className="transition-transform duration-700 group-hover:-translate-y-[3%]">
             <SiteMock palette={item.palette} headline={item.headline} variant={i} />
           </Laptop>
-        </motion.div>
+        </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
       </div>
       <p className="mt-4 text-[12px] font-medium text-muted">Website · HubSpot CMS</p>

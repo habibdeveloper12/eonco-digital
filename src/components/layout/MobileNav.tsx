@@ -1,16 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, ChevronDown, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { navigation } from "@/content/navigation";
 import { Icon } from "../ui/Icon";
 import { cn } from "../ui/cn";
+import { usePresence } from "../ui/usePresence";
 import { Logo } from "../visuals/Logo";
 
 export function MobileNav({ open, onClose, onSearch }: { open: boolean; onClose: () => void; onSearch: () => void }) {
   const [expanded, setExpanded] = useState<number | null>(null);
+  const { mounted, shown } = usePresence(open, 300);
 
   useEffect(() => {
     document.documentElement.style.overflow = open ? "hidden" : "";
@@ -20,17 +21,15 @@ export function MobileNav({ open, onClose, onSearch }: { open: boolean; onClose:
   }, [open]);
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
+    mounted && (
+        <div
           role="dialog"
           aria-modal="true"
           aria-label="Menu"
-          className="fixed inset-0 z-[60] flex flex-col bg-white lg:hidden"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+          className={cn(
+            "fixed inset-0 z-[60] flex flex-col bg-white transition-[opacity,translate] duration-300 ease-[cubic-bezier(.2,.8,.2,1)] lg:hidden",
+            shown ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0",
+          )}
         >
           <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-line px-5">
             <Logo />
@@ -67,15 +66,8 @@ export function MobileNav({ open, onClose, onSearch }: { open: boolean; onClose:
                         {item.label}
                         <ChevronDown className={cn("size-5 transition-transform", expanded === i && "rotate-180 text-brand")} />
                       </button>
-                      <AnimatePresence initial={false}>
-                        {expanded === i && (
-                          <motion.ul
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="overflow-hidden"
-                          >
+                      <div className={cn("grid transition-[grid-template-rows,opacity] duration-300", expanded === i ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
+                          <ul className="overflow-hidden" inert={expanded !== i}>
                             {item.tabs.map((t) => (
                               <li key={t.label}>
                                 <Link href={t.href} onClick={onClose} className="flex items-center gap-3 rounded-[8px] px-2 py-[10px] text-[15px] text-navy active:bg-brand-50">
@@ -87,9 +79,8 @@ export function MobileNav({ open, onClose, onSearch }: { open: boolean; onClose:
                               </li>
                             ))}
                             <li className="pb-4" />
-                          </motion.ul>
-                        )}
-                      </AnimatePresence>
+                          </ul>
+                      </div>
                     </>
                   ) : (
                     <Link href={item.href!} onClick={onClose} className="block py-[18px] font-heading text-[18px] font-medium text-navy">
@@ -112,8 +103,7 @@ export function MobileNav({ open, onClose, onSearch }: { open: boolean; onClose:
               Contact Us
             </Link>
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        </div>
+    )
   );
 }

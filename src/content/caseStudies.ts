@@ -130,7 +130,7 @@ export const caseStudies: CaseStudy[] = [
     industry: "healthcare",
     tags: ["Portal Architecture", "Workflow Automation", "Full Stack"],
     summary: "A custom practitioner portal that writes back to HubSpot and removes double handling.",
-    palette: ["#0e1b2c", "#e8233a", "#ffffff"],
+    palette: ["#0e1b2c", "#dc1f36", "#ffffff"],
     headline: "One portal for every practitioner",
     kind: "web",
     stats: [

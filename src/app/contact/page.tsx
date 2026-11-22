@@ -4,8 +4,9 @@ import { ArrowRight, CalendarDays, Check, FileText, Mail } from "lucide-react";
 import { ContactForm } from "@/components/pages/ContactForm";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
-import { site } from "@/content/site";
+import { getSiteSettings } from "@/lib/wordpress";
 
+export const revalidate = 300;
 export const metadata: Metadata = { title: "Contact Us", description: "Talk to Eonco Digital about HubSpot implementation, integrations, migrations or a new website.", alternates: { canonical: "/contact" } };
 
 const promises = [
@@ -14,13 +15,15 @@ const promises = [
   "The next three moves for your system, mapped with you",
 ];
 
-const routes = [
+const getRoutes = (email: string) => [
   { icon: CalendarDays, title: "Book a call", text: "Pick a 30-minute slot with a HubSpot consultant", cta: "See available times", href: "/schedule-meeting" },
   { icon: FileText, title: "Get a quote", text: "Share your scope, budget and timeline for a proposal", cta: "Start a project", href: "/start-a-project" },
-  { icon: Mail, title: "Ask a question", text: "Not ready for a call yet? Email the team directly", cta: site.email, href: `mailto:${site.email}` },
+  { icon: Mail, title: "Ask a question", text: "Not ready for a call yet? Email the team directly", cta: email, href: `mailto:${email}` },
 ];
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const { email } = await getSiteSettings();
+  const routes = getRoutes(email);
   return (
     <>
       {/* Split hero: pitch on the left, form card on the right */}
@@ -48,9 +51,9 @@ export default function ContactPage() {
             </ul>
 
             <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-line pt-6 text-[15px]">
-              <a href={`mailto:${site.email}`} className="inline-flex items-center gap-2 text-navy transition-colors hover:text-brand">
+              <a href={`mailto:${email}`} className="inline-flex items-center gap-2 text-navy transition-colors hover:text-brand">
                 <Mail className="size-4 text-subtle" strokeWidth={1.5} />
-                {site.email}
+                {email}
               </a>
               <Link href="/schedule-meeting" className="inline-flex items-center gap-2 text-navy transition-colors hover:text-brand">
                 <CalendarDays className="size-4 text-subtle" strokeWidth={1.5} />

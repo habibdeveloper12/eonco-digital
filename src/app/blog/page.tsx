@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { ConsultCta } from "@/components/home/ConsultCta";
 import { PageHero } from "@/components/pages/PageHero";
@@ -13,8 +14,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString("en-AU", { day: "numer
 /** Featured image when the post has one, otherwise a quiet branded cover. */
 function Cover({ p, large }: { p: BlogPost; large?: boolean }) {
   if (p.image) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={p.image} alt="" loading="lazy" className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-[cubic-bezier(.2,.8,.2,1)] group-hover:scale-[1.03]" />;
+    return <Image src={p.image} alt="" fill sizes={large ? "(min-width: 768px) 50vw, 100vw" : "(min-width: 768px) 33vw, 100vw"} className="object-cover transition-transform duration-700 ease-[cubic-bezier(.2,.8,.2,1)] group-hover:scale-[1.03]" />;
   }
   return (
     <div className="absolute inset-0 flex flex-col justify-between p-6 sm:p-8" style={{ background: p.palette[0] }}>

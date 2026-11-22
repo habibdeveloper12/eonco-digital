@@ -7,6 +7,8 @@ import { CaseTile } from "@/components/pages/CaseTile";
 import { ProjectVisual } from "@/components/pages/ProjectVisual";
 import { Reveal } from "@/components/ui/Reveal";
 import { getIndustry } from "@/content/misc";
+import { Breadcrumbs, JsonLd } from "@/components/seo/JsonLd";
+import { site } from "@/content/site";
 import { getProject, getProjects } from "@/lib/wordpress";
 
 export const revalidate = 300;
@@ -117,6 +119,20 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
         </section>
       )}
       <ConsultCta />
+      <Breadcrumbs items={[["Case studies", "/case-studies"], [c.title, `/case-studies/${c.slug}`]]} />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: c.title,
+          description: c.summary,
+          ...(c.image && { image: c.image }),
+          about: c.tags,
+          mainEntityOfPage: `${site.url}/case-studies/${c.slug}`,
+          author: { "@id": `${site.url}/#organization` },
+          publisher: { "@id": `${site.url}/#organization` },
+        }}
+      />
     </>
   );
 }

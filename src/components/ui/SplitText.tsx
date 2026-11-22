@@ -1,45 +1,33 @@
-"use client";
-import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { cn } from "./cn";
 
 type Line = { text: string; accent?: boolean };
 
-const ease = [0.2, 0.8, 0.2, 1] as const;
-
-/*
- * The in-view trigger sits on the (unclipped) parent; children animate via
- * variants. Observing the clipped children directly never fires because an
- * element translated fully outside an overflow:hidden box is not
- * "intersecting".
+/**
+ * Line-by-line masked heading reveal. Each line sits in an overflow-hidden
+ * mask and rises into place (GSAP runtime). The full text is in the HTML.
  */
-
-/** Line-by-line masked heading reveal. */
 export function SplitText({
   lines,
   className,
-  as = "h2",
+  as: Tag = "h2",
   delay = 0,
+  on = "scroll",
   lineClassName,
 }: {
   lines: Line[];
   className?: string;
   as?: "h1" | "h2" | "h3";
   delay?: number;
+  on?: "scroll" | "load";
   lineClassName?: string;
 }) {
-  const reduce = useReducedMotion();
-  const Tag = motion[as];
-  const child: Variants = {
-    hidden: { y: "105%" },
-    show: (i: number) => ({ y: "0%", transition: { duration: 0.9, delay: delay + i * 0.09, ease } }),
-  };
   return (
-    <Tag className={className} initial={reduce ? false : "hidden"} whileInView="show" viewport={{ once: true, margin: "0px 0px -8% 0px" }}>
+    <Tag className={className} data-split={on === "load" ? "load" : ""} data-delay={delay || undefined}>
       {lines.map((l, i) => (
         <span key={i} className={cn("block overflow-hidden pb-[0.08em]", lineClassName)}>
-          <motion.span custom={i} variants={child} className={cn("block", l.accent && "text-brand")}>
+          <span data-line className={cn("block", l.accent && "text-brand")} style={on === "load" ? ({ "--d": `${delay + i * 0.12}s` } as React.CSSProperties) : undefined}>
             {l.text}
-          </motion.span>
+          </span>
         </span>
       ))}
     </Tag>
@@ -48,26 +36,15 @@ export function SplitText({
 
 /** Per-letter reveal used for showcase titles. */
 export function LetterReveal({ text, className }: { text: string; className?: string }) {
-  const reduce = useReducedMotion();
-  const child: Variants = {
-    hidden: { y: "110%" },
-    show: (i: number) => ({ y: "0%", transition: { duration: 0.6, delay: i * 0.025, ease } }),
-  };
   return (
-    <motion.span
-      className={cn("inline-flex flex-wrap", className)}
-      aria-label={text}
-      initial={reduce ? false : "hidden"}
-      whileInView="show"
-      viewport={{ once: true }}
-    >
+    <span className={cn("inline-flex flex-wrap", className)} data-split="chars" aria-label={text}>
       {text.split("").map((ch, i) => (
         <span key={i} aria-hidden className="inline-block overflow-hidden">
-          <motion.span className="inline-block" custom={i} variants={child}>
-            {ch === " " ? " " : ch}
-          </motion.span>
+          <span data-line className="inline-block">
+            {ch === " " ? " " : ch}
+          </span>
         </span>
       ))}
-    </motion.span>
+    </span>
   );
 }

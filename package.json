@@ -7,11 +7,11 @@
     "dev:webpack": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prebuild": "node scripts/build-plugin.mjs",
+    "plugin:build": "node scripts/build-plugin.mjs"
   },
   "dependencies": {
-    "@fontsource/figtree": "^5.3.0",
-    "@fontsource/sora": "^5.3.0",
     "clsx": "^2.1.1",
     "framer-motion": "^14.14.0",
     "gsap": "^3.15.1",

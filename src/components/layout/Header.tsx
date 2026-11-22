@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, Search } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { navigation } from "@/content/navigation";
 import { Logo } from "../visuals/Logo";
 import { cn } from "../ui/cn";
+import { usePresence } from "../ui/usePresence";
 import { MegaPanel } from "./MegaMenu";
 import { MobileNav } from "./MobileNav";
 import { SearchDialog } from "./SearchDialog";
@@ -54,7 +54,23 @@ export function Header() {
     closeTimer.current = setTimeout(() => setOpen(null), 140);
   }, []);
 
+  // Scrolling the page means the visitor wants the page, not the menu.
+  useEffect(() => {
+    if (open === null) return;
+    const y0 = window.scrollY;
+    const onScroll = () => Math.abs(window.scrollY - y0) > 24 && setOpen(null);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [open]);
+
   const solid = scrolled || open !== null;
+  // Keep the last opened panel rendered while it animates out.
+  const [shownItem, setShownItem] = useState<number | null>(null);
+  useEffect(() => {
+    if (open !== null) setShownItem(open);
+  }, [open]);
+  const mega = usePresence(open !== null && Boolean(navigation[open]?.tabs), 180);
+  const dim = usePresence(open !== null, 200);
 
   return (
     <>
@@ -131,37 +147,28 @@ export function Header() {
           </div>
         </div>
 
-        <AnimatePresence>
-          {open !== null && navigation[open]?.tabs && (
-            <motion.div
-              key={open}
-              id={`mega-${open}`}
-              initial={{ opacity: 0, y: -12, clipPath: "inset(0 0 100% 0 round 0 0 12px 12px)" }}
-              animate={{ opacity: 1, y: 0, clipPath: "inset(0 0 0% 0 round 0 0 12px 12px)" }}
-              exit={{ opacity: 0, y: -8, transition: { duration: 0.18 } }}
-              transition={{ duration: 0.38, ease: [0.2, 0.8, 0.2, 1] }}
-              onMouseEnter={() => openNow(open)}
-              className="absolute inset-x-0 top-full hidden lg:block"
-            >
-              <MegaPanel item={navigation[open]} onNavigate={() => setOpen(null)} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {mega.mounted && shownItem !== null && navigation[shownItem]?.tabs && (
+          <div
+            id={`mega-${shownItem}`}
+            onMouseEnter={() => openNow(shownItem)}
+            className={cn(
+              "absolute inset-x-0 top-full hidden transition-[opacity,translate,clip-path] duration-300 ease-[cubic-bezier(.2,.8,.2,1)] lg:block",
+              mega.shown ? "translate-y-0 opacity-100 [clip-path:inset(0_0_0%_0_round_0_0_12px_12px)]" : "-translate-y-3 opacity-0 [clip-path:inset(0_0_100%_0_round_0_0_12px_12px)]",
+            )}
+          >
+            <MegaPanel key={shownItem} item={navigation[shownItem]} onNavigate={() => setOpen(null)} />
+          </div>
+        )}
       </header>
 
       {/* Dim page behind open mega menu */}
-      <AnimatePresence>
-        {open !== null && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 hidden bg-navy/20 backdrop-blur-[2px] lg:block"
-            onMouseEnter={closeSoon}
-            onClick={() => setOpen(null)}
-          />
-        )}
-      </AnimatePresence>
+      {dim.mounted && (
+        <div
+          className={cn("fixed inset-0 z-40 hidden bg-navy/20 backdrop-blur-[2px] transition-opacity duration-200 lg:block", dim.shown ? "opacity-100" : "opacity-0")}
+          onMouseEnter={closeSoon}
+          onClick={() => setOpen(null)}
+        />
+      )}
 
       <MobileNav open={mobile} onClose={() => setMobile(false)} onSearch={() => setSearch(true)} />
       <SearchDialog open={search} onClose={() => setSearch(false)} />

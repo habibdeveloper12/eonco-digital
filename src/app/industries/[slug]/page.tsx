@@ -8,6 +8,7 @@ import { SectionHeader } from "@/components/pages/SectionHeader";
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
 import { getIndustry, industries } from "@/content/misc";
+import { Breadcrumbs } from "@/components/seo/JsonLd";
 import { getProjects } from "@/lib/wordpress";
 import { hubspotServices } from "@/content/services";
 import Link from "next/link";
@@ -82,6 +83,7 @@ export default async function IndustryPage({ params }: { params: Promise<{ slug:
         </div>
       </section>
       <ConsultCta />
+      <Breadcrumbs items={[["Industries", "/industries"], [ind.name, `/industries/${ind.slug}`]]} />
     </>
   );
 }

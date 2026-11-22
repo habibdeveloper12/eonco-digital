@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useMotionValue, useReducedMotion, useSpring } from "framer-motion";
-import { useState } from "react";
+import { gsap } from "gsap";
+import { useEffect, useRef } from "react";
 import type { Project } from "@/lib/wordpress";
 import { Eyebrow } from "../ui/Eyebrow";
 import { Reveal } from "../ui/Reveal";
@@ -11,50 +11,48 @@ import { cn } from "../ui/cn";
 import { ProjectVisual } from "../pages/ProjectVisual";
 
 function CaseCard({ c, aspect, className, variant }: { c: Project; aspect: string; className?: string; variant: number }) {
-  const reduce = useReducedMotion();
-  const [hover, setHover] = useState(false);
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const x = useSpring(mx, { stiffness: 300, damping: 28 });
-  const y = useSpring(my, { stiffness: 300, damping: 28 });
+  // "View project" disc follows the pointer (GSAP quickTo, fine pointers only).
+  const disc = useRef<HTMLSpanElement>(null);
+  const to = useRef<{ x: (v: number) => void; y: (v: number) => void } | null>(null);
+  useEffect(() => {
+    if (!disc.current || !window.matchMedia("(pointer: fine) and (prefers-reduced-motion: no-preference)").matches) return;
+    to.current = { x: gsap.quickTo(disc.current, "x", { duration: 0.35, ease: "power3" }), y: gsap.quickTo(disc.current, "y", { duration: 0.35, ease: "power3" }) };
+  }, []);
+  const show = (on: boolean) => disc.current && gsap.to(disc.current, { scale: on ? 1 : 0, autoAlpha: on ? 1 : 0, duration: 0.25, ease: "power2.out" });
 
   return (
     <Reveal className={className}>
       <Link
         href={`/case-studies/${c.slug}`}
-        className={cn("group block", !reduce && "lg:cursor-none")}
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
+        className="group block lg:motion-safe:cursor-none"
+        onMouseEnter={() => to.current && show(true)}
+        onMouseLeave={() => to.current && show(false)}
         onMouseMove={(e) => {
+          if (!to.current) return;
           const r = e.currentTarget.getBoundingClientRect();
-          mx.set(e.clientX - r.left - 36);
-          my.set(e.clientY - r.top - 36);
+          to.current.x(e.clientX - r.left - 36);
+          to.current.y(e.clientY - r.top - 92);
         }}
       >
         <div className="relative pt-[56px]">
           {/* Client name rises from behind the card on hover */}
           <span
             aria-hidden
-            className="pointer-events-none absolute left-1/2 top-[56px] z-0 -translate-x-1/2 translate-y-[20%] whitespace-nowrap font-display text-[44px] font-medium leading-none text-white opacity-0 transition-[transform,opacity] duration-700 ease-[cubic-bezier(.2,.8,.2,1)] group-hover:-translate-y-full group-hover:opacity-100 sm:text-[64px]"
+            className="pointer-events-none absolute left-1/2 top-[56px] z-0 -translate-x-1/2 translate-y-[20%] whitespace-nowrap font-display text-[44px] font-medium leading-none text-white opacity-0 transition-[transform,translate,scale,rotate,opacity] duration-700 ease-[cubic-bezier(.2,.8,.2,1)] group-hover:-translate-y-full group-hover:opacity-100 sm:text-[64px]"
           >
             {c.client}
           </span>
           <div className={cn("relative z-10 overflow-hidden rounded-[16px] bg-navy-3", aspect)}>
             <ProjectVisual c={c} variant={variant} chrome className="transition-transform duration-700 ease-[cubic-bezier(.2,.8,.2,1)] group-hover:scale-[1.03]" />
-            {!reduce && (
-              <motion.span
-                aria-hidden
-                style={{ x, y }}
-                className={cn(
-                  "pointer-events-none absolute left-0 top-0 z-20 grid size-[72px] place-items-center rounded-full bg-brand text-center text-[13px] font-medium leading-[1.2] text-white transition-[opacity,transform] duration-200",
-                  hover ? "scale-100 opacity-100" : "scale-0 opacity-0",
-                )}
-              >
-                View
-                <br />
-                project
-              </motion.span>
-            )}
+            <span
+              ref={disc}
+              aria-hidden
+              className="pointer-events-none invisible absolute left-0 top-0 z-20 grid size-[72px] scale-0 place-items-center rounded-full bg-brand text-center text-[13px] font-medium leading-[1.2] text-white opacity-0"
+            >
+              View
+              <br />
+              project
+            </span>
           </div>
         </div>
         <div className="mt-6 px-1">

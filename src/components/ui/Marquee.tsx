@@ -27,7 +27,7 @@ export function Marquee({
         style={{ ["--marquee-duration" as string]: `${duration}s`, animationDirection: reverse ? "reverse" : "normal" }}
       >
         <div className={cn("flex shrink-0", vertical ? "flex-col" : "")}>{children}</div>
-        <div aria-hidden className={cn("flex shrink-0", vertical ? "flex-col" : "")}>
+        <div aria-hidden inert className={cn("flex shrink-0", vertical ? "flex-col" : "")}>
           {children}
         </div>
       </div>

@@ -142,7 +142,7 @@ export function ContactForm({
         {/* Honeypot */}
         <input type="text" name="_hp" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
         <label className="flex items-start gap-3 sm:col-span-2">
-          <input type="checkbox" name="consent" required value="yes" className="mt-1 size-4 accent-[#e8233a]" />
+          <input type="checkbox" name="consent" required value="yes" className="mt-1 size-4 accent-[#dc1f36]" />
           <span className="text-[13px] leading-[1.5] text-body">
             I agree to Eonco Digital storing my details to respond to this enquiry, as described in the{" "}
             <a href="/privacy-policy" className="underline">

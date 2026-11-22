@@ -33,7 +33,7 @@ export function Button({ href, children, variant = "primary", size = "md", class
       <span
         aria-hidden
         className={cn(
-          "absolute right-[10px] top-1/2 z-10 grid -translate-y-1/2 translate-x-[60px] scale-50 place-items-center rounded-full opacity-0 transition-[transform,opacity] duration-500 ease-[cubic-bezier(.2,.8,.2,1)] group-hover/btn:translate-x-0 group-hover/btn:scale-100 group-hover/btn:opacity-100",
+          "absolute right-[10px] top-1/2 z-10 grid -translate-y-1/2 translate-x-[60px] scale-50 place-items-center rounded-full opacity-0 transition-[transform,translate,scale,rotate,opacity] duration-500 ease-[cubic-bezier(.2,.8,.2,1)] group-hover/btn:translate-x-0 group-hover/btn:scale-100 group-hover/btn:opacity-100",
           size === "md" ? "size-[36px]" : "size-[28px]",
           variant === "light" ? "bg-brand text-white" : "bg-white text-navy",
         )}

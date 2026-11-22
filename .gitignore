@@ -22,7 +22,9 @@ out/
 
 # Gatsby
 .cache/
-public/
+
+# Generated on every build by scripts/build-plugin.mjs (npm prebuild)
+public/wp-plugin/
 
 # Environment variables
 .env
@@ -45,7 +47,7 @@ lerna-debug.log*
 !.yarn/plugins
 !.yarn/sdks
 !.yarn/versions
-package-lock.json
+# package-lock.json is committed so Vercel installs the exact tested versions
 pnpm-lock.yaml
 yarn.lock
 

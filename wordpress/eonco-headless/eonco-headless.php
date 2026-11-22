@@ -2,7 +2,8 @@
 /**
  * Plugin Name:       Eonco Headless
  * Description:       Lets the Eonco Digital website (Next.js) read Projects, Testimonials and Blog posts from this WordPress site, and refreshes the website the moment content is published.
- * Version:           1.0.0
+ * Version:           1.2.0
+ * Update URI:        eonco-headless
  * Requires at least: 6.2
  * Requires PHP:      7.4
  * Author:            Eonco Digital
@@ -16,6 +17,7 @@ if (!defined('ABSPATH')) {
 final class Eonco_Headless
 {
     const OPT = 'eonco_headless';
+    const VERSION = '1.2.0';
 
     /** Industries must match IndustrySlug in src/content/caseStudies.ts */
     const INDUSTRIES = [
@@ -48,6 +50,106 @@ final class Eonco_Headless
 
         // Optional: send public visitors of this WordPress site to the real website.
         add_action('template_redirect', [__CLASS__, 'maybe_redirect']);
+
+        // Company details editable by editors, served at /wp-json/eonco/v1/settings
+        self::site_init();
+
+        // Self-update from the website, so the plugin never has to be uploaded again.
+        self::updater_init();
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Self-updater                                                        */
+    /* ------------------------------------------------------------------ */
+
+    /**
+     * Checks {Website URL}/wp-plugin/eonco-headless.json for a newer version and
+     * installs it through the normal WordPress update system (auto-update on).
+     * The website URL is the one set in Settings → Eonco Website.
+     */
+    private static function update_source()
+    {
+        $o = get_option(self::OPT, []);
+        $url = rtrim($o['frontend_url'] ?? '', '/');
+        return $url ? $url . '/wp-plugin/eonco-headless.json' : '';
+    }
+
+    private static function remote_info()
+    {
+        $src = self::update_source();
+        if (!$src) return null;
+        $cached = get_transient('eonco_update_info');
+        if (is_array($cached) && ($cached['src'] ?? '') === $src) return $cached['data'];
+        $res = wp_remote_get($src, ['timeout' => 8, 'headers' => ['Accept' => 'application/json']]);
+        $data = null;
+        if (!is_wp_error($res) && wp_remote_retrieve_response_code($res) === 200) {
+            $json = json_decode(wp_remote_retrieve_body($res), true);
+            if (is_array($json) && !empty($json['version']) && !empty($json['package'])) {
+                // A relative package path is resolved against the update source folder.
+                if (!preg_match('#^https?://#i', $json['package'])) {
+                    $json['package'] = trailingslashit(dirname($src)) . ltrim($json['package'], '/');
+                }
+                $data = $json;
+            }
+        }
+        set_transient('eonco_update_info', ['src' => $src, 'data' => $data], 6 * HOUR_IN_SECONDS);
+        return $data;
+    }
+
+    public static function updater_init()
+    {
+        $basename = plugin_basename(__FILE__);
+
+        add_filter('pre_set_site_transient_update_plugins', function ($transient) use ($basename) {
+            if (!is_object($transient)) return $transient;
+            $info = self::remote_info();
+            if ($info && version_compare($info['version'], self::VERSION, '>')) {
+                $transient->response[$basename] = (object) [
+                    'id'          => 'eonco-headless',
+                    'slug'        => 'eonco-headless',
+                    'plugin'      => $basename,
+                    'new_version' => $info['version'],
+                    'package'     => $info['package'],
+                    'url'         => $info['homepage'] ?? '',
+                    'tested'      => $info['tested'] ?? '',
+                    'requires'    => $info['requires'] ?? '6.2',
+                ];
+            } elseif (isset($transient->no_update)) {
+                $transient->no_update[$basename] = (object) ['id' => 'eonco-headless', 'slug' => 'eonco-headless', 'plugin' => $basename, 'new_version' => self::VERSION, 'package' => ''];
+            }
+            return $transient;
+        });
+
+        // "View details" popup in the Plugins screen.
+        add_filter('plugins_api', function ($result, $action, $args) {
+            if ($action !== 'plugin_information' || ($args->slug ?? '') !== 'eonco-headless') return $result;
+            $info = self::remote_info();
+            if (!$info) return $result;
+            return (object) [
+                'name'          => 'Eonco Headless',
+                'slug'          => 'eonco-headless',
+                'version'       => $info['version'],
+                'author'        => 'Eonco Digital',
+                'requires'      => $info['requires'] ?? '6.2',
+                'tested'        => $info['tested'] ?? '',
+                'download_link' => $info['package'],
+                'sections'      => ['changelog' => wp_kses_post($info['changelog'] ?? '')],
+            ];
+        }, 10, 3);
+
+        // Install updates automatically (can still be switched off in Plugins).
+        add_filter('auto_update_plugin', function ($update, $item) {
+            return (isset($item->slug) && $item->slug === 'eonco-headless') ? true : $update;
+        }, 10, 2);
+
+        // Re-check right after the website URL changes, and after an update.
+        add_action('update_option_' . self::OPT, function () {
+            delete_transient('eonco_update_info');
+            delete_site_transient('update_plugins');
+        });
+        add_action('upgrader_process_complete', function () {
+            delete_transient('eonco_update_info');
+        });
     }
 
     /* ------------------------------------------------------------------ */
@@ -185,7 +287,7 @@ final class Eonco_Headless
                         printf('<textarea id="%1$s" name="%1$s">%2$s</textarea>', esc_attr($key), esc_textarea($val));
                         break;
                     case 'color':
-                        printf('<input type="color" id="%1$s" name="%1$s" value="%2$s">', esc_attr($key), esc_attr($val ?: ($key === 'eonco_color_ink' ? '#ffffff' : ($key === 'eonco_color_accent' ? '#e8233a' : '#0a2035'))));
+                        printf('<input type="color" id="%1$s" name="%1$s" value="%2$s">', esc_attr($key), esc_attr($val ?: ($key === 'eonco_color_ink' ? '#ffffff' : ($key === 'eonco_color_accent' ? '#dc1f36' : '#0a2035'))));
                         break;
                     case 'industry':
                         printf('<select id="%1$s" name="%1$s">', esc_attr($key));
@@ -353,6 +455,162 @@ final class Eonco_Headless
         }
         wp_safe_redirect(add_query_arg('eonco_test', rawurlencode($msg), admin_url('options-general.php?page=eonco-headless')));
         exit;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Company details (Settings → Eonco Company Details)                  */
+    /* ------------------------------------------------------------------ */
+
+    const SITE = 'eonco_site';
+    const SOCIALS = ['linkedin' => 'LinkedIn', 'facebook' => 'Facebook', 'instagram' => 'Instagram', 'x' => 'X (Twitter)', 'youtube' => 'YouTube'];
+
+    public static function site_defaults()
+    {
+        return [
+            'email'         => '',
+            'phone'         => '',
+            'partner_label' => '',
+            'socials'       => array_fill_keys(array_keys(self::SOCIALS), ''),
+            'offices'       => array_fill(0, 3, ['region' => '', 'address' => '', 'phone' => '']),
+            'stats'         => array_fill(0, 4, ['label' => '', 'value' => '', 'note' => '']),
+            'why'           => array_fill(0, 3, ['value' => '', 'title' => '', 'text' => '']),
+        ];
+    }
+
+    public static function site_get()
+    {
+        $d = self::site_defaults();
+        $o = get_option(self::SITE, []);
+        $o = is_array($o) ? $o : [];
+        $out = wp_parse_args($o, $d);
+        foreach (['socials', 'offices', 'stats', 'why'] as $k) {
+            $out[$k] = is_array($out[$k]) ? $out[$k] : $d[$k];
+        }
+        return $out;
+    }
+
+    public static function site_init()
+    {
+        add_action('admin_menu', function () {
+            add_options_page('Eonco Company Details', 'Eonco Company Details', 'edit_others_posts', 'eonco-company', [__CLASS__, 'site_page']);
+        });
+        add_action('admin_post_eonco_save_site', [__CLASS__, 'site_save']);
+        add_action('rest_api_init', function () {
+            register_rest_route('eonco/v1', '/settings', [
+                'methods'             => 'GET',
+                'permission_callback' => '__return_true', // public, read-only, contains only published company details
+                'callback'            => function () {
+                    return rest_ensure_response(self::site_get());
+                },
+            ]);
+        });
+    }
+
+    public static function site_save()
+    {
+        if (!current_user_can('edit_others_posts')) wp_die('Not allowed');
+        check_admin_referer('eonco_site');
+        $in = isset($_POST['site']) && is_array($_POST['site']) ? wp_unslash($_POST['site']) : [];
+        $d = self::site_defaults();
+        $clean = [
+            'email'         => sanitize_email($in['email'] ?? ''),
+            'phone'         => sanitize_text_field($in['phone'] ?? ''),
+            'partner_label' => sanitize_text_field($in['partner_label'] ?? ''),
+            'socials'       => [],
+            'offices'       => [],
+            'stats'         => [],
+            'why'           => [],
+        ];
+        foreach (array_keys(self::SOCIALS) as $k) {
+            $clean['socials'][$k] = esc_url_raw(trim($in['socials'][$k] ?? ''));
+        }
+        foreach (array_keys($d['offices']) as $i) {
+            $o = $in['offices'][$i] ?? [];
+            $clean['offices'][] = ['region' => sanitize_text_field($o['region'] ?? ''), 'address' => sanitize_textarea_field($o['address'] ?? ''), 'phone' => sanitize_text_field($o['phone'] ?? '')];
+        }
+        foreach (array_keys($d['stats']) as $i) {
+            $s = $in['stats'][$i] ?? [];
+            $clean['stats'][] = ['label' => sanitize_text_field($s['label'] ?? ''), 'value' => sanitize_text_field($s['value'] ?? ''), 'note' => sanitize_text_field($s['note'] ?? '')];
+        }
+        foreach (array_keys($d['why']) as $i) {
+            $s = $in['why'][$i] ?? [];
+            $clean['why'][] = ['value' => sanitize_text_field($s['value'] ?? ''), 'title' => sanitize_text_field($s['title'] ?? ''), 'text' => sanitize_textarea_field($s['text'] ?? '')];
+        }
+        update_option(self::SITE, $clean, false);
+        self::revalidate(false);
+        wp_safe_redirect(admin_url('options-general.php?page=eonco-company&saved=1'));
+        exit;
+    }
+
+    public static function site_page()
+    {
+        $s = self::site_get();
+        $n = 'site';
+        $f = function ($name, $val, $ph = '', $type = 'text') {
+            printf('<input type="%s" class="regular-text" name="%s" value="%s" placeholder="%s">', esc_attr($type), esc_attr($name), esc_attr($val), esc_attr($ph));
+        };
+        ?>
+        <div class="wrap">
+            <h1>Eonco Company Details</h1>
+            <p>These details appear across the website (footer, contact page, homepage figures and search-engine data). <strong>Leave a field empty to keep the website's current text.</strong></p>
+            <?php if (!empty($_GET['saved'])) : ?><div class="notice notice-success"><p>Saved. The website will update within a few seconds.</p></div><?php endif; ?>
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                <input type="hidden" name="action" value="eonco_save_site">
+                <?php wp_nonce_field('eonco_site'); ?>
+
+                <h2>Contact</h2>
+                <table class="form-table" role="presentation">
+                    <tr><th>Email</th><td><?php $f("{$n}[email]", $s['email'], 'hello@eoncodigital.com', 'email'); ?></td></tr>
+                    <tr><th>Main phone</th><td><?php $f("{$n}[phone]", $s['phone'], '+61 2 0000 0000'); ?></td></tr>
+                    <tr><th>Hero label</th><td><?php $f("{$n}[partner_label]", $s['partner_label'], 'HubSpot Specialists'); ?><p class="description">The small label above the homepage headline, e.g. your real HubSpot partner tier.</p></td></tr>
+                </table>
+
+                <h2>Social profiles</h2>
+                <table class="form-table" role="presentation">
+                    <?php foreach (self::SOCIALS as $k => $label) : ?>
+                        <tr><th><?php echo esc_html($label); ?></th><td><?php $f("{$n}[socials][{$k}]", $s['socials'][$k] ?? '', 'https://', 'url'); ?></td></tr>
+                    <?php endforeach; ?>
+                </table>
+
+                <h2>Offices</h2>
+                <p class="description">Offices with an empty name or address are not shown.</p>
+                <table class="form-table" role="presentation">
+                    <?php foreach ($s['offices'] as $i => $o) : ?>
+                        <tr><th>Office <?php echo (int) $i + 1; ?></th><td>
+                            <p><?php $f("{$n}[offices][{$i}][region]", $o['region'] ?? '', 'Name, e.g. Head Office'); ?></p>
+                            <p><textarea class="regular-text" rows="2" name="<?php echo esc_attr("{$n}[offices][{$i}][address]"); ?>" placeholder="Street address&#10;City, Postcode"><?php echo esc_textarea($o['address'] ?? ''); ?></textarea></p>
+                            <p><?php $f("{$n}[offices][{$i}][phone]", $o['phone'] ?? '', 'Phone'); ?></p>
+                        </td></tr>
+                    <?php endforeach; ?>
+                </table>
+
+                <h2>Homepage figures (“Who we are”)</h2>
+                <p class="description">Only publish numbers you can back up. Value examples: <code>$2.4M</code>, <code>40+</code>, <code>30K+</code>, <code>5 / 5</code>.</p>
+                <table class="form-table" role="presentation">
+                    <?php foreach ($s['stats'] as $i => $st) : ?>
+                        <tr><th>Figure <?php echo (int) $i + 1; ?></th><td>
+                            <p><?php $f("{$n}[stats][{$i}][label]", $st['label'] ?? '', 'Label, e.g. Pipeline generated'); ?></p>
+                            <p><?php $f("{$n}[stats][{$i}][value]", $st['value'] ?? '', 'Value, e.g. $2.4M'); ?></p>
+                            <p><?php $f("{$n}[stats][{$i}][note]", $st['note'] ?? '', 'Note, e.g. In the last 12 months'); ?></p>
+                        </td></tr>
+                    <?php endforeach; ?>
+                </table>
+
+                <h2>Homepage figures (“Why Eonco”)</h2>
+                <table class="form-table" role="presentation">
+                    <?php foreach ($s['why'] as $i => $w) : ?>
+                        <tr><th>Card <?php echo (int) $i + 1; ?></th><td>
+                            <p><?php $f("{$n}[why][{$i}][value]", $w['value'] ?? '', 'Value, e.g. 1,000+'); ?></p>
+                            <p><?php $f("{$n}[why][{$i}][title]", $w['title'] ?? '', 'Title, e.g. Automations built'); ?></p>
+                            <p><textarea class="regular-text" rows="2" name="<?php echo esc_attr("{$n}[why][{$i}][text]"); ?>" placeholder="One or two sentences"><?php echo esc_textarea($w['text'] ?? ''); ?></textarea></p>
+                        </td></tr>
+                    <?php endforeach; ?>
+                </table>
+
+                <?php submit_button('Save company details'); ?>
+            </form>
+        </div>
+        <?php
     }
 
     public static function maybe_redirect()

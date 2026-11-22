@@ -8,7 +8,7 @@ import { cn } from "../ui/cn";
 
 const steps = ["Strategy", "Build", "Launch", "Support"];
 
-export function WhoWeAre() {
+export function WhoWeAre({ figures = stats.whoWeAre }: { figures?: typeof stats.whoWeAre }) {
   return (
     <section className="bg-white py-[88px]">
       <div className="container-x gutter">
@@ -21,7 +21,7 @@ export function WhoWeAre() {
 
         <Reveal className="mt-12 rounded-[16px] border border-line bg-white">
           <div className="grid grid-cols-1 divide-y divide-line sm:grid-cols-2 lg:grid-cols-4 lg:divide-x lg:divide-y-0">
-            {stats.whoWeAre.map((s, i) => (
+            {figures.map((s, i) => (
               <div key={s.label} className={cn("px-6 py-8 text-left sm:px-8", i === 1 && "sm:border-l sm:border-line lg:border-l-0", i === 3 && "sm:border-l sm:border-line lg:border-l-0")}>
                 <p className="text-[15px] text-body">{s.label}</p>
                 <Counter value={s.value} prefix={s.prefix} suffix={s.suffix} decimals={s.decimals} className="mt-3 block font-display text-[44px] font-medium leading-none tabular-nums text-navy" />

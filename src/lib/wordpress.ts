@@ -13,7 +13,8 @@
  * plugin calls /api/revalidate after someone publishes or updates content.
  */
 import { caseStudies as localCases, featuredCaseSlugs, type CaseStudy, type IndustrySlug } from "@/content/caseStudies";
-import { featuredTestimonial as localFeatured, posts as localPosts, testimonials as localTestimonials, type Post } from "@/content/misc";
+import { featuredTestimonial as localFeatured, posts as localPosts, stats as localStats, testimonials as localTestimonials, type Post } from "@/content/misc";
+import { site } from "@/content/site";
 
 const WP = process.env.WORDPRESS_URL?.replace(/\/+$/, "");
 export const wordpressEnabled = Boolean(WP);
@@ -67,13 +68,23 @@ export const plain = (html = "") =>
 const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 const list = (v: unknown, sep: RegExp = /,/) => str(v).split(sep).map((s) => s.trim()).filter(Boolean);
 const paragraphs = (v: unknown) => list(v, /\n\s*\n|\r?\n/);
-const image = (it: WPItem) => it._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
+/** Featured image URL, only when it lives in this WordPress media library (see images.remotePatterns in next.config). */
+const image = (it: WPItem) => {
+  const src = it._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
+  if (!src || !WP) return undefined;
+  try {
+    const u = new URL(src);
+    return u.hostname === new URL(WP).hostname && u.pathname.startsWith("/wp-content/uploads/") ? src : undefined;
+  } catch {
+    return undefined;
+  }
+};
 const terms = (it: WPItem, taxonomy: string) => (it._embedded?.["wp:term"] ?? []).flat().filter((t) => t.taxonomy === taxonomy).map((t) => plain(t.name));
 const readTime = (html: string) => `${Math.max(1, Math.round(plain(html).split(" ").length / 220))} min read`;
 
 /** Rotating brand-safe palettes for posts without a featured image. */
 const postPalettes: Post["palette"][] = [
-  ["#fff1f2", "#e8233a", "#001729"],
+  ["#fff1f2", "#dc1f36", "#001729"],
   ["#eef4fb", "#012c4c", "#001729"],
   ["#f8f9fb", "#c81a2f", "#0d1a2b"],
   ["#fdf7f5", "#a31326", "#001729"],
@@ -86,8 +97,10 @@ const postPalettes: Post["palette"][] = [
 export type BlogPost = Post & { html?: string; image?: string };
 
 export async function getPosts(): Promise<BlogPost[]> {
-  const items = await wpGet("posts?per_page=50&_embed=wp:featuredmedia,wp:term");
-  if (!items) return localPosts;
+  // WordPress's own sample post ("Hello world!") is never shown.
+  const items = (await wpGet("posts?per_page=50&_embed=wp:featuredmedia,wp:term"))?.filter((it) => it.slug !== "hello-world");
+  // Until the first real post is published, keep showing the built-in articles.
+  if (!items?.length) return localPosts;
   return items.map((it, i) => {
     const html = it.content?.rendered ?? "";
     return {
@@ -127,7 +140,7 @@ function toProject(it: WPItem): Project {
     industry: industries.includes(industry) ? industry : "professional-services",
     tags: list(m.eonco_tags),
     summary: plain(it.excerpt?.rendered),
-    palette: [str(m.eonco_color_bg) || "#0a2035", str(m.eonco_color_accent) || "#e8233a", str(m.eonco_color_ink) || "#ffffff"],
+    palette: [str(m.eonco_color_bg) || "#0a2035", str(m.eonco_color_accent) || "#dc1f36", str(m.eonco_color_ink) || "#ffffff"],
     headline: str(m.eonco_headline) || plain(it.title.rendered),
     kind: m.eonco_kind === "web" ? "web" : "crm",
     // One result per line, written as "38% | Faster enquiry response"
@@ -147,9 +160,13 @@ function toProject(it: WPItem): Project {
 
 export async function getProjects(): Promise<Project[]> {
   const items = await wpGet("case-studies?per_page=100&_embed=wp:featuredmedia");
-  if (!items) return localCases.map((c) => ({ ...c, featured: featuredCaseSlugs.includes(c.slug) }));
+  // Until the first project is published in WordPress, keep showing the sample projects.
+  if (!items?.length) return localCases.map((c) => ({ ...c, featured: featuredCaseSlugs.includes(c.slug) }));
   return items.map(toProject);
 }
+
+/** True when projects come from WordPress rather than the built-in samples. */
+const projectsFromWordPress = async () => Boolean((await wpGet("case-studies?per_page=1"))?.length);
 
 export async function getProject(slug: string) {
   return (await getProjects()).find((c) => c.slug === slug);
@@ -159,8 +176,96 @@ export async function getProject(slug: string) {
 export async function getFeaturedProjects(): Promise<Project[]> {
   const all = await getProjects();
   const featured = all.filter((c) => c.featured);
-  if (!wordpressEnabled) return featuredCaseSlugs.map((s) => all.find((c) => c.slug === s)!).filter(Boolean);
+  if (!(await projectsFromWordPress())) return featuredCaseSlugs.map((s) => all.find((c) => c.slug === s)!).filter(Boolean);
   return (featured.length ? featured : all).slice(0, 6);
+}
+
+/* ------------------------------------------------------------------ */
+/* Site settings (WordPress → Settings → Eonco Website)                */
+/* ------------------------------------------------------------------ */
+
+type Stat = (typeof localStats.whoWeAre)[number];
+type WhyStat = (typeof localStats.why)[number];
+
+export type SiteSettings = {
+  email: string;
+  phone: string;
+  partnerLabel: string;
+  socials: { label: string; href: string }[];
+  offices: { region: string; lines: string[]; phone: string }[];
+  stats: Stat[];
+  why: WhyStat[];
+};
+
+type WPSettings = {
+  email?: string;
+  phone?: string;
+  partner_label?: string;
+  socials?: Record<string, string>;
+  offices?: { region?: string; address?: string; phone?: string }[];
+  stats?: { label?: string; value?: string; note?: string }[];
+  why?: { value?: string; title?: string; text?: string }[];
+};
+
+/** "$2.4M" → { prefix: "$", value: 2.4, decimals: 1, suffix: "M" } */
+function parseFigure(raw: string) {
+  const m = raw.trim().match(/^([^0-9-]*)(-?[0-9][0-9,]*(?:\.([0-9]+))?)(.*)$/);
+  if (!m) return null;
+  return { prefix: m[1], value: Number(m[2].replace(/,/g, "")), decimals: m[3]?.length ?? 0, suffix: m[4] };
+}
+
+const SOCIAL_LABELS: Record<string, string> = { linkedin: "LinkedIn", facebook: "Facebook", instagram: "Instagram", x: "X", youtube: "YouTube" };
+
+const localSettings: SiteSettings = {
+  email: site.email,
+  phone: "",
+  partnerLabel: site.partnerLabel,
+  socials: site.socials.map((s) => ({ ...s })),
+  offices: site.offices.map((o) => ({ ...o, lines: [...o.lines] })),
+  stats: localStats.whoWeAre,
+  why: localStats.why,
+};
+
+/** Company details and homepage figures. Empty WordPress fields keep the built-in values. */
+export async function getSiteSettings(): Promise<SiteSettings> {
+  if (!WP) return localSettings;
+  let s: WPSettings | null = null;
+  try {
+    const res = await fetch(`${WP}/wp-json/eonco/v1/settings`, { next: { revalidate: 300, tags: [WP_TAG] } });
+    if (res.ok) s = (await res.json()) as WPSettings;
+  } catch (err) {
+    console.error("[wordpress] settings failed, using local content:", err);
+  }
+  if (!s) return localSettings;
+
+  const socials = Object.entries(s.socials ?? {})
+    .filter(([, href]) => str(href))
+    .map(([k, href]) => ({ label: SOCIAL_LABELS[k] ?? k, href: str(href) }));
+  const offices = (s.offices ?? [])
+    .filter((o) => str(o.region) && str(o.address))
+    .map((o) => ({ region: str(o.region), lines: list(o.address, /\r?\n|,/), phone: str(o.phone) }));
+  const stats = (s.stats ?? [])
+    .map((st): Stat | null => {
+      const f = parseFigure(str(st.value));
+      return f && str(st.label) ? { label: str(st.label), value: f.value, prefix: f.prefix, suffix: f.suffix, decimals: f.decimals, note: str(st.note) ? [[str(st.note), "muted"]] : [] } : null;
+    })
+    .filter((x): x is Stat => Boolean(x));
+  const why = (s.why ?? [])
+    .map((w, i): WhyStat | null => {
+      const f = parseFigure(str(w.value));
+      return f && str(w.title) ? { icon: localStats.why[i]?.icon ?? "Workflow", value: f.value, suffix: f.suffix, title: str(w.title), text: str(w.text) } : null;
+    })
+    .filter((x): x is WhyStat => Boolean(x));
+
+  return {
+    email: str(s.email) || localSettings.email,
+    phone: str(s.phone),
+    partnerLabel: str(s.partner_label) || localSettings.partnerLabel,
+    socials: socials.length ? socials : localSettings.socials,
+    offices: offices.length ? offices : localSettings.offices,
+    stats: stats.length ? stats : localSettings.stats,
+    why: why.length ? why : localSettings.why,
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -169,7 +274,7 @@ export async function getFeaturedProjects(): Promise<Project[]> {
 
 export async function getTestimonials(): Promise<{ featured: Testimonial | null; list: Testimonial[] }> {
   const items = await wpGet("testimonials?per_page=50");
-  if (!items) return { featured: localFeatured, list: localTestimonials };
+  if (!items?.length) return { featured: localFeatured, list: localTestimonials };
   const all: Testimonial[] = items.map((it) => ({
     quote: plain(it.content?.rendered),
     name: plain(it.title.rendered),

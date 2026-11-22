@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { ConsultCta } from "@/components/home/ConsultCta";
 import { site } from "@/content/site";
+import { Breadcrumbs, JsonLd } from "@/components/seo/JsonLd";
 import { getPost, getPosts } from "@/lib/wordpress";
 
 export const revalidate = 300;
@@ -37,9 +39,10 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           </div>
         </header>
         {p.image && (
-          <div className="mx-auto -mt-2 max-w-[980px] px-5 pt-10">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={p.image} alt="" className="aspect-[16/9] w-full rounded-[20px] object-cover" />
+          <div className="mx-auto max-w-[980px] px-5 pt-10">
+            <div className="relative aspect-[16/9] overflow-hidden rounded-[20px]">
+              <Image src={p.image} alt="" fill priority sizes="(min-width: 1024px) 940px, 100vw" className="object-cover" />
+            </div>
           </div>
         )}
         {p.html ? (
@@ -64,9 +67,22 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         )}
       </article>
       <ConsultCta />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "BlogPosting", headline: p.title, datePublished: p.date, image: p.image, author: { "@type": "Organization", name: site.name } }) }}
+      <Breadcrumbs items={[["Blog", "/blog"], [p.title, `/blog/${p.slug}`]]} />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BlogPosting",
+          headline: p.title,
+          description: p.excerpt,
+          datePublished: p.date,
+          dateModified: p.date,
+          ...(p.image && { image: p.image }),
+          articleSection: p.category,
+          mainEntityOfPage: `${site.url}/blog/${p.slug}`,
+          author: { "@id": `${site.url}/#organization` },
+          publisher: { "@id": `${site.url}/#organization` },
+          inLanguage: "en-AU",
+        }}
       />
     </>
   );
