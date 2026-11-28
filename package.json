@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "prebuild": "node scripts/build-plugin.mjs",
-    "plugin:build": "node scripts/build-plugin.mjs"
+    "plugin:build": "node scripts/build-plugin.mjs",
+    "hubspot:setup": "node scripts/hubspot-setup.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

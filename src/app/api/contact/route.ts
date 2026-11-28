@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
+import { site } from "@/content/site";
 
 /**
  * Contact and project inquiry endpoint.
  *
- * When HUBSPOT_PORTAL_ID and the relevant form GUID are set, submissions are
+ * When the HubSpot portal (site.hubspot) and the relevant form GUID are set
+ * (HUBSPOT_CONTACT_FORM_GUID / HUBSPOT_PROJECT_FORM_GUID, created by
+ * `npm run hubspot:setup`), submissions are
  * forwarded to the HubSpot Forms API (no private token needed):
  *   https://api.hsforms.com/submissions/v3/integration/submit/{portalId}/{formGuid}
  * The HubSpot form must contain fields with matching internal names
@@ -29,7 +32,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Please complete the required fields with a valid email address." }, { status: 422 });
   }
 
-  const portalId = process.env.HUBSPOT_PORTAL_ID;
+  const { portalId, region } = site.hubspot;
   const formGuid = body.kind === "project" ? process.env.HUBSPOT_PROJECT_FORM_GUID : process.env.HUBSPOT_CONTACT_FORM_GUID;
 
   if (!portalId || !formGuid) {
@@ -39,13 +42,16 @@ export async function POST(req: Request) {
 
   const fields = FIELDS.filter((k) => body[k]).map((name) => ({ objectTypeId: "0-1", name, value: String(body[name]).slice(0, 5000) }));
   const hutk = req.headers.get("cookie")?.match(/hubspotutk=([^;]+)/)?.[1];
+  const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || undefined;
+  // EU accounts submit to their own data centre; every other region uses the global host.
+  const host = region === "eu1" ? "api-eu1.hsforms.com" : "api.hsforms.com";
 
-  const res = await fetch(`https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formGuid}`, {
+  const res = await fetch(`https://${host}/submissions/v3/integration/submit/${portalId}/${formGuid}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       fields,
-      context: { pageUri: body.pageUri, pageName: body.pageName, ...(hutk ? { hutk } : {}) },
+      context: { pageUri: body.pageUri, pageName: body.pageName, ...(hutk ? { hutk } : {}), ...(ipAddress ? { ipAddress } : {}) },
       legalConsentOptions: body.consent
         ? { consent: { consentToProcess: true, text: "I agree to Take Solution Today storing my details to respond to this enquiry." } }
         : undefined,

@@ -14,7 +14,13 @@ export const site = {
   description:
     "Take Solution Today designs, builds and runs HubSpot systems for growing companies: CRM implementation, integrations, migrations, high-converting websites and outbound programs.",
   email: "hello@takesolutiontoday.com",
-  meetingsUrl: process.env.NEXT_PUBLIC_HUBSPOT_MEETINGS_URL || "",
+  meetingsUrl: process.env.NEXT_PUBLIC_HUBSPOT_MEETINGS_URL || "https://meetings-na2.hubspot.com/habibur-rahman",
+  // HubSpot account (the portal ID is public: it is in the tracking script URL).
+  hubspot: {
+    portalId: (process.env.HUBSPOT_PORTAL_ID || "243233455").trim(),
+    // Data-centre region from the embed code host: js-na2.hs-scripts.com → "na2".
+    region: (process.env.HUBSPOT_REGION || "na2").trim(),
+  },
   // Partner tier: set this to your real HubSpot partner tier before launch.
   partnerLabel: "HubSpot Specialists",
   reviewSummary: { rating: 5, count: "[N]", platform: "HubSpot" },
