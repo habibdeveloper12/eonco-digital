@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { WP_TAG } from "@/lib/wordpress";
 
 /**
- * Called by the Eonco Headless WordPress plugin whenever a post, project or
+ * Called by the Take Solution Today Website WordPress plugin whenever a post, project or
  * testimonial is published, updated or deleted, so the site shows the change
  * within seconds instead of waiting for the 5 minute cache.
  *

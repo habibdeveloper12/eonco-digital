@@ -10,7 +10,7 @@ import { PipelineBoard } from "../visuals/PipelineBoard";
 const defaultLines = ["Growth Runs", "on Systems.", "We Build Them."];
 const defaultText = "We design, build and run HubSpot systems for growing companies in Australia, the US, the UK and Europe: CRM, integrations, websites and the automation that connects them.";
 
-/** Headline lines and intro can be changed in WordPress → Settings → Eonco Company Details. The last line is shown in brand red. */
+/** Headline lines and intro can be changed in WordPress → Settings → Company Details. The last line is shown in brand red. */
 export function Hero({ label, lines = defaultLines, text = defaultText }: { label: string; lines?: string[]; text?: string }) {
   const headline = lines.length ? lines : defaultLines;
   return (

@@ -8,7 +8,7 @@ import { getServices } from "@/lib/cms";
 import { getSiteSettings } from "@/lib/wordpress";
 
 export const revalidate = 300;
-export const metadata: Metadata = { title: "Contact Us", description: "Talk to Eonco Digital about HubSpot implementation, integrations, migrations or a new website.", alternates: { canonical: "/contact" } };
+export const metadata: Metadata = { title: "Contact Us", description: "Talk to Take Solution Today about HubSpot implementation, integrations, migrations or a new website.", alternates: { canonical: "/contact" } };
 
 const promises = [
   "A reply from a consultant within one business day",

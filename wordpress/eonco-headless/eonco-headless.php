@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name:       Eonco Headless
- * Description:       Runs the Eonco Digital website (Next.js) from this dashboard: services, industries, HubSpot themes, pages, projects, testimonials, blog posts, homepage text and SEO. The website refreshes the moment content is published.
- * Version:           1.3.0
+ * Plugin Name:       Take Solution Today Website
+ * Description:       Runs the Take Solution Today website (Next.js) from this dashboard: services, industries, HubSpot themes, pages, projects, testimonials, blog posts, homepage text and SEO. The website refreshes the moment content is published.
+ * Version:           1.4.0
  * Update URI:        eonco-headless
  * Requires at least: 6.2
  * Requires PHP:      7.4
- * Author:            Eonco Digital
+ * Author:            Take Solution Today
  * Text Domain:       eonco-headless
  */
 
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 final class Eonco_Headless
 {
     const OPT = 'eonco_headless';
-    const VERSION = '1.3.0';
+    const VERSION = '1.4.0';
 
     /** Industries must match IndustrySlug in src/content/caseStudies.ts */
     const INDUSTRIES = [
@@ -65,7 +65,7 @@ final class Eonco_Headless
     /**
      * Checks {Website URL}/wp-plugin/eonco-headless.json for a newer version and
      * installs it through the normal WordPress update system (auto-update on).
-     * The website URL is the one set in Settings → Eonco Website.
+     * The website URL is the one set in Settings → Website Connection.
      */
     private static function update_source()
     {
@@ -126,10 +126,10 @@ final class Eonco_Headless
             $info = self::remote_info();
             if (!$info) return $result;
             return (object) [
-                'name'          => 'Eonco Headless',
+                'name'          => 'Take Solution Today Website',
                 'slug'          => 'eonco-headless',
                 'version'       => $info['version'],
-                'author'        => 'Eonco Digital',
+                'author'        => 'Take Solution Today',
                 'requires'      => $info['requires'] ?? '6.2',
                 'tested'        => $info['tested'] ?? '',
                 'download_link' => $info['package'],
@@ -420,7 +420,7 @@ final class Eonco_Headless
 
     public static function settings_menu()
     {
-        add_options_page('Eonco Website', 'Eonco Website', 'manage_options', 'eonco-headless', [__CLASS__, 'settings_page']);
+        add_options_page('Website Connection', 'Website Connection', 'manage_options', 'eonco-headless', [__CLASS__, 'settings_page']);
     }
 
     public static function settings_register()
@@ -445,8 +445,8 @@ final class Eonco_Headless
         $import = isset($_GET['eonco_import']) ? sanitize_text_field(wp_unslash($_GET['eonco_import'])) : '';
         ?>
         <div class="wrap">
-            <h1>Eonco Website</h1>
-            <p>Connects this WordPress dashboard to the Eonco Digital website. Services, Industries, HubSpot Themes, Pages, Projects, Testimonials and Posts published here appear on the website within seconds.</p>
+            <h1>Website Connection</h1>
+            <p>Connects this WordPress dashboard to the Take Solution Today website. Services, Industries, HubSpot Themes, Pages, Projects, Testimonials and Posts published here appear on the website within seconds.</p>
             <?php if ($result === 'ok') : ?>
                 <div class="notice notice-success"><p>Connected. The website refreshed successfully.</p></div>
             <?php elseif ($result) : ?>
@@ -457,7 +457,7 @@ final class Eonco_Headless
                 <table class="form-table" role="presentation">
                     <tr>
                         <th scope="row"><label for="eonco_url">Website URL</label></th>
-                        <td><input id="eonco_url" class="regular-text" type="url" name="<?php echo esc_attr(self::OPT); ?>[frontend_url]" value="<?php echo esc_attr($o['frontend_url']); ?>" placeholder="https://eoncodigital.com">
+                        <td><input id="eonco_url" class="regular-text" type="url" name="<?php echo esc_attr(self::OPT); ?>[frontend_url]" value="<?php echo esc_attr($o['frontend_url']); ?>" placeholder="https://takesolutiontoday.com">
                             <p class="description">The live Next.js website address.</p></td>
                     </tr>
                     <tr>
@@ -529,7 +529,7 @@ final class Eonco_Headless
     }
 
     /* ------------------------------------------------------------------ */
-    /* Company details (Settings → Eonco Company Details)                  */
+    /* Company details (Settings → Company Details)                  */
     /* ------------------------------------------------------------------ */
 
     const SITE = 'eonco_site';
@@ -574,7 +574,7 @@ final class Eonco_Headless
     public static function site_init()
     {
         add_action('admin_menu', function () {
-            add_options_page('Eonco Company Details', 'Eonco Company Details', 'edit_others_posts', 'eonco-company', [__CLASS__, 'site_page']);
+            add_options_page('Company Details', 'Company Details', 'edit_others_posts', 'eonco-company', [__CLASS__, 'site_page']);
         });
         add_action('admin_post_eonco_save_site', [__CLASS__, 'site_save']);
         add_action('rest_api_init', function () {
@@ -645,7 +645,7 @@ final class Eonco_Headless
         };
         ?>
         <div class="wrap">
-            <h1>Eonco Company Details</h1>
+            <h1>Company Details</h1>
             <p>These details appear across the website (footer, contact page, homepage figures and search-engine data). <strong>Leave a field empty to keep the website's current text.</strong></p>
             <?php if (!empty($_GET['saved'])) : ?><div class="notice notice-success"><p>Saved. The website will update within a few seconds.</p></div><?php endif; ?>
             <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
@@ -654,7 +654,7 @@ final class Eonco_Headless
 
                 <h2>Contact</h2>
                 <table class="form-table" role="presentation">
-                    <tr><th>Email</th><td><?php $f("{$n}[email]", $s['email'], 'hello@eoncodigital.com', 'email'); ?></td></tr>
+                    <tr><th>Email</th><td><?php $f("{$n}[email]", $s['email'], 'hello@takesolutiontoday.com', 'email'); ?></td></tr>
                     <tr><th>Main phone</th><td><?php $f("{$n}[phone]", $s['phone'], '+61 2 0000 0000'); ?></td></tr>
                     <tr><th>Hero label</th><td><?php $f("{$n}[partner_label]", $s['partner_label'], 'HubSpot Specialists'); ?><p class="description">The small label above the homepage headline, e.g. your real HubSpot partner tier.</p></td></tr>
                 </table>
@@ -664,7 +664,7 @@ final class Eonco_Headless
                     <tr><th>Headline</th><td><textarea class="large-text" rows="3" name="<?php echo esc_attr("{$n}[hero_lines]"); ?>" placeholder="Growth Runs&#10;on Systems.&#10;We Build Them."><?php echo esc_textarea($s['hero_lines']); ?></textarea>
                         <p class="description">One line per row (2 to 4 short lines). The last line is shown in brand red.</p></td></tr>
                     <tr><th>Intro text</th><td><textarea class="large-text" rows="3" name="<?php echo esc_attr("{$n}[hero_text]"); ?>"><?php echo esc_textarea($s['hero_text']); ?></textarea></td></tr>
-                    <tr><th>Google title</th><td><?php $f("{$n}[home_title]", $s['home_title'], 'Eonco Digital | HubSpot Implementation, Integration & Website Agency'); ?>
+                    <tr><th>Google title</th><td><?php $f("{$n}[home_title]", $s['home_title'], 'Take Solution Today | HubSpot Implementation, Integration & Website Agency'); ?>
                         <p class="description">The homepage title in Google (about 60 characters). Include “HubSpot agency” or your main service.</p></td></tr>
                     <tr><th>Google description</th><td><textarea class="large-text" rows="2" name="<?php echo esc_attr("{$n}[home_description]"); ?>"><?php echo esc_textarea($s['home_description']); ?></textarea>
                         <p class="description">About 150 characters, shown under the title in Google.</p></td></tr>
@@ -684,7 +684,7 @@ final class Eonco_Headless
                 <h2>Default search &amp; social</h2>
                 <p class="description">Used for pages that have no SEO fields of their own.</p>
                 <table class="form-table" role="presentation">
-                    <tr><th>Default title</th><td><?php $f("{$n}[seo_title]", $s['seo_title'], 'Eonco Digital | HubSpot Implementation, Integration & Web Agency'); ?></td></tr>
+                    <tr><th>Default title</th><td><?php $f("{$n}[seo_title]", $s['seo_title'], 'Take Solution Today | HubSpot Implementation, Integration & Web Agency'); ?></td></tr>
                     <tr><th>Default description</th><td><textarea class="large-text" rows="2" name="<?php echo esc_attr("{$n}[seo_description]"); ?>"><?php echo esc_textarea($s['seo_description']); ?></textarea></td></tr>
                     <tr><th>Default share image</th><td><input type="url" class="regular-text" id="eonco_site_seo_image" name="<?php echo esc_attr("{$n}[seo_image]"); ?>" value="<?php echo esc_attr($s['seo_image']); ?>" placeholder="https://">
                         <button type="button" class="button eonco-pick-image" data-target="eonco_site_seo_image">Choose image</button>

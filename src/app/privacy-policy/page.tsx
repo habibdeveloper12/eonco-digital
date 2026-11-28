@@ -26,7 +26,7 @@ export default async function Page() {
         <h2>How we use it</h2>
         <p>We use your details to respond to your enquiry, provide our services and, where you agree, send relevant updates. Form submissions are stored in our CRM (HubSpot).</p>
         <h2>Your rights</h2>
-        <p>You can ask to access, correct or delete your personal information at any time by emailing hello@eoncodigital.com.</p>
+        <p>You can ask to access, correct or delete your personal information at any time by emailing hello@takesolutiontoday.com.</p>
       </section>
     </>
   );

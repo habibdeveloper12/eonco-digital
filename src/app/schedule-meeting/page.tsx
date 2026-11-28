@@ -4,7 +4,7 @@ import { ContactForm } from "@/components/pages/ContactForm";
 import { PageHero } from "@/components/pages/PageHero";
 import { site } from "@/content/site";
 
-export const metadata: Metadata = { title: "Schedule a Meeting", description: "Book a 30 minute HubSpot consultation with Eonco Digital.", alternates: { canonical: "/schedule-meeting" } };
+export const metadata: Metadata = { title: "Schedule a Meeting", description: "Book a 30 minute HubSpot consultation with Take Solution Today.", alternates: { canonical: "/schedule-meeting" } };
 
 export default function SchedulePage() {
   const url = site.meetingsUrl;
@@ -15,7 +15,7 @@ export default function SchedulePage() {
         <div className="container-narrow gutter">
           {url ? (
             <div className="overflow-hidden rounded-[20px] border-[0.8px] border-line bg-white shadow-soft">
-              <iframe title="Book a meeting with Eonco Digital" src={`${url}${url.includes("?") ? "&" : "?"}embed=true`} className="h-[760px] w-full" loading="lazy" />
+              <iframe title="Book a meeting with Take Solution Today" src={`${url}${url.includes("?") ? "&" : "?"}embed=true`} className="h-[760px] w-full" loading="lazy" />
             </div>
           ) : (
             <div className="grid gap-8 lg:grid-cols-[340px_1fr]">

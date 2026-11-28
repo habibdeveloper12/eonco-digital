@@ -8,7 +8,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { getIndustries } from "@/lib/cms";
 
 export const revalidate = 300;
-export const metadata: Metadata = { title: "HubSpot by Industry", description: "How Eonco Digital sets up HubSpot for professional services, healthcare, ecommerce, construction, SaaS and education.", alternates: { canonical: "/industries" } };
+export const metadata: Metadata = { title: "HubSpot by Industry", description: "How Take Solution Today sets up HubSpot for professional services, healthcare, ecommerce, construction, SaaS and education.", alternates: { canonical: "/industries" } };
 
 export default async function IndustriesPage() {
   const industries = await getIndustries();

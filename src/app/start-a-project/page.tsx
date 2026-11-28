@@ -4,7 +4,7 @@ import { ContactForm } from "@/components/pages/ContactForm";
 import { PageHero } from "@/components/pages/PageHero";
 import { getServices } from "@/lib/cms";
 
-export const metadata: Metadata = { title: "Start a Project", description: "Share your project details and get a scoped proposal from Eonco Digital.", alternates: { canonical: "/start-a-project" } };
+export const metadata: Metadata = { title: "Start a Project", description: "Share your project details and get a scoped proposal from Take Solution Today.", alternates: { canonical: "/start-a-project" } };
 
 const steps = ["We review your brief within one business day", "A 30 minute discovery call with a consultant", "A written scope, timeline and fixed quote"];
 

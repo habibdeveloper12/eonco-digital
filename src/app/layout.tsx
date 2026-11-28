@@ -12,7 +12,7 @@ import { getIndustries, getServices, getStandalonePages, getThemes } from "@/lib
 import { buildSearchIndex } from "@/lib/searchIndex";
 import { getPosts, getProjects, getSiteSettings } from "@/lib/wordpress";
 
-/** Site-wide defaults. The default title, description and share image can be set in WordPress → Settings → Eonco Company Details. */
+/** Site-wide defaults. The default title, description and share image can be set in WordPress → Settings → Company Details. */
 export async function generateMetadata(): Promise<Metadata> {
   const { seo } = await getSiteSettings();
   const title = seo.title || `${site.name} | HubSpot Implementation, Integration & Web Agency`;

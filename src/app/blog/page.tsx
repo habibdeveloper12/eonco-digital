@@ -6,7 +6,7 @@ import { PageHero } from "@/components/pages/PageHero";
 import { Reveal } from "@/components/ui/Reveal";
 import { getPosts, type BlogPost } from "@/lib/wordpress";
 
-export const metadata: Metadata = { title: "Blog", description: "Practical guides on HubSpot, RevOps, migrations and growth systems from Eonco Digital.", alternates: { canonical: "/blog" } };
+export const metadata: Metadata = { title: "Blog", description: "Practical guides on HubSpot, RevOps, migrations and growth systems from Take Solution Today.", alternates: { canonical: "/blog" } };
 export const revalidate = 300;
 
 const fmt = (d: string) => new Date(d).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });

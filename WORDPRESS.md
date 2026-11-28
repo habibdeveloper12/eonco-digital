@@ -1,6 +1,6 @@
 # Managing the website from WordPress
 
-WordPress is the dashboard for the Eonco Digital website. Your team edits in WordPress, and the website (Next.js) updates within seconds. No code and no rebuilds.
+WordPress is the dashboard for the Take Solution Today website. Your team edits in WordPress, and the website (Next.js) updates within seconds. No code and no rebuilds.
 
 | In WordPress | On the website |
 |---|---|
@@ -11,7 +11,7 @@ WordPress is the dashboard for the Eonco Digital website. Your team edits in Wor
 | **Posts** | `/blog` |
 | **Projects** | `/case-studies` and the homepage showcase |
 | **Testimonials** | Homepage quotes |
-| **Settings → Eonco Company Details** | Contact details, offices, socials, homepage headline, homepage figures, homepage FAQ, default SEO |
+| **Settings → Company Details** | Contact details, offices, socials, homepage headline, homepage figures, homepage FAQ, default SEO |
 
 Still in the website code: the About page, the page layouts and design, the HubSpot Modules and Apps lists, and the homepage section headings.
 
@@ -30,17 +30,17 @@ After updating, go to **Settings → Permalinks** and click **Save** once. This 
 
 | Name | Value |
 |---|---|
-| `WORDPRESS_URL` | Your WordPress address, e.g. `https://cms.eoncodigital.com` (no slash at the end) |
+| `WORDPRESS_URL` | Your WordPress address, e.g. `https://cms.takesolutiontoday.com` (no slash at the end) |
 | `REVALIDATE_SECRET` | A long random password |
-| `NEXT_PUBLIC_SITE_URL` | `https://www.eoncodigital.com` |
+| `NEXT_PUBLIC_SITE_URL` | `https://takesolutiontoday.com` |
 
 Redeploy once after changing them.
 
 ### 3. Connect WordPress to the website
 
-In WordPress, go to **Settings → Eonco Website**:
+In WordPress, go to **Settings → Website Connection**:
 
-- **Website URL**: `https://www.eoncodigital.com`
+- **Website URL**: `https://takesolutiontoday.com`
 - **Refresh secret**: the same value as `REVALIDATE_SECRET`
 - **Search engines**: keep *"Hide this WordPress site from Google"* ticked
 
@@ -96,7 +96,7 @@ These work as before. Only publish projects and quotes the client has approved.
 
 ### Homepage
 
-Go to **Settings → Eonco Company Details**. You can edit:
+Go to **Settings → Company Details**. You can edit:
 
 - the headline (one line per row; the last line is shown in red)
 - the intro text
@@ -114,7 +114,7 @@ Every service, industry, theme, page, post and project has a **Search & social**
 
 | Field | Tip |
 |---|---|
-| Search title | About 60 characters, main phrase first: *HubSpot Migration Services \| Zero Data Loss*. "\| Eonco Digital" is added automatically. |
+| Search title | About 60 characters, main phrase first: *HubSpot Migration Services \| Zero Data Loss*. "\| Take Solution Today" is added automatically. |
 | Search description | 120 to 155 characters. Say what you offer and who it is for. |
 | Share image | 1200 × 630 px, used on LinkedIn, Facebook and X. |
 | Hide from search engines | Removes the page from Google, the sitemap and `llms.txt`. |

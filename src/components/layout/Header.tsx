@@ -86,7 +86,7 @@ export function Header({ navigation = defaultNavigation, searchIndex }: { naviga
         <div className="mx-auto flex h-[72px] max-w-[1320px] items-center justify-between px-5 lg:h-[84px] lg:px-8">
           <Logo />
 
-          <nav aria-label="Main" className="hidden lg:block">
+          <nav aria-label="Main" className="hidden xl:block">
             <ul className="flex items-center gap-1 xl:gap-2">
               {navigation.map((item, i) => (
                 <li key={item.label} onMouseEnter={() => (item.tabs ? openNow(i) : setOpen(null))}>
@@ -98,7 +98,7 @@ export function Header({ navigation = defaultNavigation, searchIndex }: { naviga
                       onClick={() => setOpen(open === i ? null : i)}
                       onFocus={() => openNow(i)}
                       className={cn(
-                        "flex items-center gap-1 rounded-full px-3 py-2 text-[14px] text-navy transition-colors hover:text-brand",
+                        "flex items-center gap-1 whitespace-nowrap rounded-full px-3 py-2 text-[14px] text-navy transition-colors hover:text-brand",
                         open === i && "text-brand",
                       )}
                     >
@@ -108,7 +108,7 @@ export function Header({ navigation = defaultNavigation, searchIndex }: { naviga
                   ) : (
                     <Link
                       href={item.href!}
-                      className={cn("rounded-full px-3 py-2 text-[14px] text-navy transition-colors hover:text-brand", pathname === item.href && "text-brand")}
+                      className={cn("whitespace-nowrap rounded-full px-3 py-2 text-[14px] text-navy transition-colors hover:text-brand", pathname === item.href && "text-brand")}
                     >
                       {item.label}
                     </Link>
@@ -129,7 +129,7 @@ export function Header({ navigation = defaultNavigation, searchIndex }: { naviga
             </button>
             <Link
               href="/contact"
-              className="hidden h-[48px] items-center rounded-full bg-brand px-[32px] text-[16px] font-medium text-white transition-colors hover:bg-brand-600 active:scale-[0.98] lg:inline-flex"
+              className="hidden h-[48px] items-center rounded-full bg-brand px-[32px] text-[16px] font-medium text-white transition-colors hover:bg-brand-600 active:scale-[0.98] xl:inline-flex whitespace-nowrap"
             >
               Contact Us
             </Link>
@@ -138,7 +138,7 @@ export function Header({ navigation = defaultNavigation, searchIndex }: { naviga
               aria-label="Open menu"
               aria-expanded={mobile}
               onClick={() => setMobile(true)}
-              className="grid size-[44px] place-items-center rounded-[10px] bg-brand lg:hidden"
+              className="grid size-[44px] place-items-center rounded-[10px] bg-brand xl:hidden"
             >
               <span className="flex w-[20px] flex-col items-end gap-[5px]">
                 <span className="h-[2.5px] w-full rounded-full bg-white" />
@@ -154,7 +154,7 @@ export function Header({ navigation = defaultNavigation, searchIndex }: { naviga
             id={`mega-${shownItem}`}
             onMouseEnter={() => openNow(shownItem)}
             className={cn(
-              "absolute inset-x-0 top-full hidden transition-[opacity,translate,clip-path] duration-300 ease-[cubic-bezier(.2,.8,.2,1)] lg:block",
+              "absolute inset-x-0 top-full hidden transition-[opacity,translate,clip-path] duration-300 ease-[cubic-bezier(.2,.8,.2,1)] xl:block",
               mega.shown ? "translate-y-0 opacity-100 [clip-path:inset(0_0_0%_0_round_0_0_12px_12px)]" : "-translate-y-3 opacity-0 [clip-path:inset(0_0_100%_0_round_0_0_12px_12px)]",
             )}
           >
@@ -166,7 +166,7 @@ export function Header({ navigation = defaultNavigation, searchIndex }: { naviga
       {/* Dim page behind open mega menu */}
       {dim.mounted && (
         <div
-          className={cn("fixed inset-0 z-40 hidden bg-navy/20 backdrop-blur-[2px] transition-opacity duration-200 lg:block", dim.shown ? "opacity-100" : "opacity-0")}
+          className={cn("fixed inset-0 z-40 hidden bg-navy/20 backdrop-blur-[2px] transition-opacity duration-200 xl:block", dim.shown ? "opacity-100" : "opacity-0")}
           onMouseEnter={closeSoon}
           onClick={() => setOpen(null)}
         />

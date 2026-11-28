@@ -9,12 +9,12 @@ const price = (slug: string) => services.find((s) => s.slug === slug)?.packages[
  */
 export const homeFaqs = [
   {
-    q: "What does Eonco Digital do?",
-    a: "Eonco Digital is a HubSpot-focused growth agency. We design, build and run HubSpot systems for growing companies: CRM implementation and onboarding, integrations, migrations from other CRMs, HubSpot CMS websites, cold email outbound, UI/UX design and AI agents, delivered by one in-house team.",
+    q: "What does Take Solution Today do?",
+    a: "Take Solution Today is a HubSpot-focused growth agency. We design, build and run HubSpot systems for growing companies: CRM implementation and onboarding, integrations, migrations from other CRMs, HubSpot CMS websites, cold email outbound, UI/UX design and AI agents, delivered by one in-house team.",
   },
   {
     q: "How much does HubSpot implementation cost?",
-    a: `HubSpot onboarding with Eonco Digital starts from ${price("hubspot-onboarding")} per project for the Starter package, ${services.find((s) => s.slug === "hubspot-onboarding")?.packages[1].price} for Professional, and Enterprise rollouts are scoped per project. Integrations start from ${price("hubspot-integration")}, ongoing admin support from ${price("hubspot-admin-and-technical-support")} and outbound programs from ${price("cold-email-outbound")}. Final pricing is confirmed after a discovery call.`,
+    a: `HubSpot onboarding with Take Solution Today starts from ${price("hubspot-onboarding")} per project for the Starter package, ${services.find((s) => s.slug === "hubspot-onboarding")?.packages[1].price} for Professional, and Enterprise rollouts are scoped per project. Integrations start from ${price("hubspot-integration")}, ongoing admin support from ${price("hubspot-admin-and-technical-support")} and outbound programs from ${price("cold-email-outbound")}. Final pricing is confirmed after a discovery call.`,
   },
   {
     q: "How long does a HubSpot implementation take?",

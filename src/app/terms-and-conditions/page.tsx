@@ -26,7 +26,7 @@ export default async function Page() {
         <h2>Services</h2>
         <p>Engagements are governed by a separate written agreement or statement of work.</p>
         <h2>Intellectual property</h2>
-        <p>All content on this site is owned by Eonco Digital unless stated otherwise.</p>
+        <p>All content on this site is owned by Take Solution Today unless stated otherwise.</p>
       </section>
     </>
   );

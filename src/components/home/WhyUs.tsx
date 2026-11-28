@@ -13,13 +13,13 @@ export function WhyUs({ cards = stats.why }: { cards?: typeof stats.why }) {
         <div className="grid gap-6 lg:grid-cols-[1fr_518px] lg:items-start">
           <div>
             <Reveal>
-              <Eyebrow>Why Eonco</Eyebrow>
+              <Eyebrow>Why us</Eyebrow>
             </Reveal>
             <SplitText className="text-section-sm mt-4 text-navy" lines={[{ text: "We Build Your" }, { text: "Revenue Engine", accent: true }]} />
           </div>
           <Reveal delay={0.1}>
             <p className="text-[17px] leading-[1.55] text-body lg:pt-2">
-              Businesses choose Eonco Digital because we build the foundations growth depends on: clean data, connected tools, automation people trust and reporting leadership can act on. We stay accountable after launch, so the system keeps improving as you scale.
+              Businesses choose Take Solution Today because we build the foundations growth depends on: clean data, connected tools, automation people trust and reporting leadership can act on. We stay accountable after launch, so the system keeps improving as you scale.
             </p>
           </Reveal>
         </div>

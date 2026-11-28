@@ -6,16 +6,16 @@ import type { IndustrySlug } from "./caseStudies";
  * permission-granted client reviews before launch.
  */
 export const testimonials = [
-  { quote: "Eonco mapped how our team actually works before touching HubSpot. Six weeks later we had pipelines people use and a forecast leadership trusts.", name: "[Client name]", role: "Head of Sales, Professional Services" },
+  { quote: "They mapped how our team actually works before touching HubSpot. Six weeks later we had pipelines people use and a forecast leadership trusts.", name: "[Client name]", role: "Head of Sales, Professional Services" },
   { quote: "The migration was the part we dreaded most. Every record, note and attachment came across, and our team barely noticed the switch.", name: "[Client name]", role: "Operations Manager, Distribution" },
   { quote: "Our new website is faster, easier to edit and every enquiry now lands in the CRM with its source attached. That alone changed our marketing meetings.", name: "[Client name]", role: "Marketing Lead, Construction" },
   { quote: "They built an integration other partners told us was impossible, documented it properly and trained our team to look after it.", name: "[Client name]", role: "Founder, Health Technology" },
-  { quote: "Responsive, clear and calm under deadlines. Eonco feels like part of our team rather than an outside agency.", name: "[Client name]", role: "Managing Director, Education" },
+  { quote: "Responsive, clear and calm under deadlines. The team feels like part of our team rather than an outside agency.", name: "[Client name]", role: "Managing Director, Education" },
   { quote: "The outbound program booked more qualified meetings in a quarter than we managed in the whole previous year.", name: "[Client name]", role: "CEO, B2B SaaS" },
 ];
 
 export const featuredTestimonial = {
-  quote: "Eonco rebuilt our HubSpot from the ground up. We finally have one system for sales and service, and the team actually enjoys using it.",
+  quote: "They rebuilt our HubSpot from the ground up. We finally have one system for sales and service, and the team actually enjoys using it.",
   name: "[Client name]",
   role: "[Role], [Company]",
 };
@@ -76,7 +76,7 @@ export type Product = {
   modified?: string;
 };
 
-/** SAMPLE products. Replace with Eonco's own themes and modules. */
+/** SAMPLE products. Replace with your own themes and modules. */
 export const themes: Product[] = [
   {
     slug: "atlas-theme", category: "B2B & Agency", name: "Atlas", tagline: "Atlas: The B2B Agency Theme",

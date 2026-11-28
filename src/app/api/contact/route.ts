@@ -47,7 +47,7 @@ export async function POST(req: Request) {
       fields,
       context: { pageUri: body.pageUri, pageName: body.pageName, ...(hutk ? { hutk } : {}) },
       legalConsentOptions: body.consent
-        ? { consent: { consentToProcess: true, text: "I agree to Eonco Digital storing my details to respond to this enquiry." } }
+        ? { consent: { consentToProcess: true, text: "I agree to Take Solution Today storing my details to respond to this enquiry." } }
         : undefined,
     }),
   });

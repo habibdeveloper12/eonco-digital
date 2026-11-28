@@ -134,7 +134,7 @@ export function ServiceTemplate({ s, related }: { s: Service; related: Project[]
       {/* Comparison */}
       {s.comparison.rows.length > 0 && <section className="py-[80px]">
         <div className="container-narrow gutter">
-          <SectionHeader eyebrow="Comparison" title="Typical Approach vs" accent="Eonco Digital" />
+          <SectionHeader eyebrow="Comparison" title="Typical Approach vs" accent="Take Solution Today" />
           <Reveal className="mt-12 overflow-x-auto rounded-[20px] border-[0.8px] border-line">
             <table className="w-full min-w-[640px] text-left">
               <thead>
@@ -146,7 +146,7 @@ export function ServiceTemplate({ s, related }: { s: Service; related: Project[]
                     Typical approach
                   </th>
                   <th scope="col" className="bg-navy px-6 py-5 text-[14px] font-medium text-white">
-                    Eonco Digital
+                    Take Solution Today
                   </th>
                 </tr>
               </thead>
@@ -268,7 +268,7 @@ export function ServiceTemplate({ s, related }: { s: Service; related: Project[]
         </div>
       </section>}
 
-      <ConsultCta title={["Start Your ", s.name, " with Eonco"]} />
+      <ConsultCta title={["Start Your ", s.name, " with Us"]} />
     </>
   );
 }

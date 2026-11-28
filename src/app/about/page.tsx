@@ -8,7 +8,7 @@ import { SectionHeader } from "@/components/pages/SectionHeader";
 import { Reveal } from "@/components/ui/Reveal";
 import { LogoMark } from "@/components/visuals/Logo";
 
-export const metadata: Metadata = { title: "About Us", description: "Eonco Digital is a HubSpot-focused growth agency building CRM, websites, integrations and automation for growing teams.", alternates: { canonical: "/about" } };
+export const metadata: Metadata = { title: "About Us", description: "Take Solution Today is a HubSpot-focused growth agency building CRM, websites, integrations and automation for growing teams.", alternates: { canonical: "/about" } };
 
 const values = [
   { icon: Compass, title: "Process before platform", text: "We map how your business works before we configure anything." },
@@ -49,9 +49,9 @@ export default function AboutPage() {
     <>
       <PageHero
         tone="cream"
-        eyebrow="About Eonco Digital"
+        eyebrow="About Take Solution Today"
         title={<>We Build the Systems <span className="text-brand">Growth Runs On</span></>}
-        text="Eonco Digital is a HubSpot-focused growth agency. We combine CRM consulting, development and design to give growing teams one connected system for marketing, sales and service."
+        text="Take Solution Today is a HubSpot-focused growth agency. We combine CRM consulting, development and design to give growing teams one connected system for marketing, sales and service."
         primary={{ label: "Work with us", href: "/start-a-project" }}
         secondary={{ label: "Our case studies", href: "/case-studies" }}
         visual={<AboutVisual />}
@@ -74,10 +74,10 @@ export default function AboutPage() {
       </section>
       <section className="bg-navy py-[80px] text-white">
         <div className="container-narrow gutter grid gap-10 lg:grid-cols-2">
-          <SectionHeader dark align="left" eyebrow="Our story" title="Why We" accent="Started Eonco" />
+          <SectionHeader dark align="left" eyebrow="Our story" title="Why We" accent="Started Take Solution Today" />
           <Reveal className="space-y-4 text-[18px] leading-[1.65] text-white/80">
             <p>We kept meeting businesses that had invested in HubSpot but still ran on spreadsheets, inboxes and memory. The software was never the problem. The missing piece was a system designed around how the team actually worked.</p>
-            <p>Eonco Digital exists to close that gap: consultants who understand revenue operations, developers who can build what the platform cannot do out of the box, and designers who make it all easy to use.</p>
+            <p>Take Solution Today exists to close that gap: consultants who understand revenue operations, developers who can build what the platform cannot do out of the box, and designers who make it all easy to use.</p>
             <p className="text-[14px] text-white/50">[Replace this story with your own founding story.]</p>
           </Reveal>
         </div>

@@ -1,6 +1,6 @@
 <?php
 /**
- * Editable website pages for the Eonco Digital website:
+ * Editable website pages for the Take Solution Today website:
  *   - Services, Industries and HubSpot Themes (content types with their own fields)
  *   - "Search & social" box (SEO title, description, share image, hide from Google) on every type
  *   - "View" links that open the real website instead of this WordPress site
@@ -137,7 +137,7 @@ final class Eonco_Content
                 'eonco_starting'    => ['“Where are you starting from?” cards', 'textarea', self::PAIRS],
                 'eonco_results'     => ['“What results you can expect” cards', 'textarea', self::PAIRS],
                 'eonco_types'       => ['“Types of service” cards', 'textarea', self::PAIRS],
-                'eonco_comparison'  => ['Comparison table', 'textarea', 'One row per line:   Area | Typical approach | Eonco Digital'],
+                'eonco_comparison'  => ['Comparison table', 'textarea', 'One row per line:   Area | Typical approach | Take Solution Today'],
                 'eonco_process'     => ['Process steps', 'textarea', self::PAIRS],
             ] + $packages + [
                 'eonco_faqs'        => ['FAQs', 'textarea', 'One per line:   Question | Answer   These also appear in Google and AI answers, so answer directly in the first sentence.'],
@@ -235,7 +235,7 @@ final class Eonco_Content
             <p class="description">Optional. Empty fields use the page title and summary. Yoast SEO or Rank Math values are used too when installed.</p>
             <p><label for="eonco_seo_title">Search title <span class="eonco-count" data-for="eonco_seo_title" data-max="60"></span></label>
                 <input type="text" id="eonco_seo_title" name="eonco_seo_title" value="<?php echo esc_attr($v('eonco_seo_title')); ?>" placeholder="Main search phrase first, e.g. HubSpot Migration Services | Zero Data Loss">
-                <span class="description">Up to about 60 characters. “| Eonco Digital” is added automatically.</span></p>
+                <span class="description">Up to about 60 characters. “| Take Solution Today” is added automatically.</span></p>
             <p><label for="eonco_seo_description">Search description <span class="eonco-count" data-for="eonco_seo_description" data-max="155"></span></label>
                 <textarea id="eonco_seo_description" name="eonco_seo_description" rows="3" placeholder="One or two sentences that answer what the page offers and who it is for."><?php echo esc_textarea($v('eonco_seo_description')); ?></textarea>
                 <span class="description">About 120 to 155 characters. Shown under the title in Google.</span></p>
@@ -358,7 +358,7 @@ JS;
         if (($count->publish ?? 0) + ($count->draft ?? 0) > 0) return;
         $url = admin_url('options-general.php?page=eonco-headless#import');
         printf(
-            '<div class="notice notice-info"><p><strong>Start with the website’s current content.</strong> Use <a href="%s">Settings → Eonco Website → Import website content</a> to copy every page in, then edit what you need. Publishing your first item here before importing will replace the website’s built-in list.</p></div>',
+            '<div class="notice notice-info"><p><strong>Start with the website’s current content.</strong> Use <a href="%s">Settings → Website Connection → Import website content</a> to copy every page in, then edit what you need. Publishing your first item here before importing will replace the website’s built-in list.</p></div>',
             esc_url($url)
         );
     }

@@ -22,7 +22,7 @@ export function buildSearchIndex(d: Data): SearchEntry[] {
     ...d.posts.map((p) => ({ title: p.title, href: `/blog/${p.slug}`, type: "Blog", text: p.excerpt })),
     ...d.themes.map((t) => ({ title: t.tagline, href: `/hubspot-themes/${t.slug}`, type: "Theme", text: t.description })),
     ...(d.pages ?? []).map((p) => ({ title: p.title, href: `/${p.slug}`, type: "Page", text: p.excerpt })),
-    { title: "About Eonco Digital", href: "/about", type: "Page", text: "Who we are and how we work." },
+    { title: "About Take Solution Today", href: "/about", type: "Page", text: "Who we are and how we work." },
     { title: "Contact", href: "/contact", type: "Page", text: "Get in touch with our team." },
     { title: "Start a Project", href: "/start-a-project", type: "Page", text: "Tell us about your project." },
     { title: "Schedule a Meeting", href: "/schedule-meeting", type: "Page", text: "Book a 30 minute consultation." },

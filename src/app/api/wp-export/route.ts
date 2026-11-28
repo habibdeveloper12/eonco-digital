@@ -6,7 +6,7 @@ import { services } from "@/content/services";
 
 /**
  * The website's built-in content in the shape the WordPress plugin stores it,
- * so WordPress → Settings → Eonco Website → "Import website content" can fill
+ * so WordPress → Settings → Website Connection → "Import website content" can fill
  * the dashboard in one click instead of retyping every page.
  *
  * GET /api/wp-export   header: x-revalidate-secret: <REVALIDATE_SECRET>
@@ -118,13 +118,13 @@ export async function GET(req: Request) {
         slug: "privacy-policy",
         title: "Privacy Policy",
         content:
-          "<p>[Template only. Have this policy reviewed by a qualified legal adviser before publishing.]</p><h2>What we collect</h2><p>When you submit a form we collect your name, email address, phone number, company details and the message you send. We also use cookies and analytics to understand how the site is used.</p><h2>How we use it</h2><p>We use your details to respond to your enquiry, provide our services and, where you agree, send relevant updates. Form submissions are stored in our CRM (HubSpot).</p><h2>Your rights</h2><p>You can ask to access, correct or delete your personal information at any time by emailing hello@eoncodigital.com.</p>",
+          "<p>[Template only. Have this policy reviewed by a qualified legal adviser before publishing.]</p><h2>What we collect</h2><p>When you submit a form we collect your name, email address, phone number, company details and the message you send. We also use cookies and analytics to understand how the site is used.</p><h2>How we use it</h2><p>We use your details to respond to your enquiry, provide our services and, where you agree, send relevant updates. Form submissions are stored in our CRM (HubSpot).</p><h2>Your rights</h2><p>You can ask to access, correct or delete your personal information at any time by emailing hello@takesolutiontoday.com.</p>",
       },
       {
         slug: "terms-and-conditions",
         title: "Terms and Conditions",
         content:
-          "<p>[Template only. Have this document reviewed by a qualified legal adviser before publishing.]</p><h2>Use of this website</h2><p>The content on this website is provided for general information only and may change without notice.</p><h2>Services</h2><p>Engagements are governed by a separate written agreement or statement of work.</p><h2>Intellectual property</h2><p>All content on this site is owned by Eonco Digital unless stated otherwise.</p>",
+          "<p>[Template only. Have this document reviewed by a qualified legal adviser before publishing.]</p><h2>Use of this website</h2><p>The content on this website is provided for general information only and may change without notice.</p><h2>Services</h2><p>Engagements are governed by a separate written agreement or statement of work.</p><h2>Intellectual property</h2><p>All content on this site is owned by Take Solution Today unless stated otherwise.</p>",
       },
     ],
     settings: {

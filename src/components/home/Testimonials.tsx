@@ -47,7 +47,7 @@ export function Testimonials({ featured, list }: { featured: T | null; list: T[]
           <h2 className="text-section-sm mt-5 text-navy">
             Trusted by Teams <span className="text-brand">Across</span> Industries
           </h2>
-          <p className="mt-5 text-[17px] leading-[1.55] text-body">Eonco Digital helps businesses across industries build revenue systems in HubSpot that teams adopt and leaders trust.</p>
+          <p className="mt-5 text-[17px] leading-[1.55] text-body">Take Solution Today helps businesses across industries build revenue systems in HubSpot that teams adopt and leaders trust.</p>
         </Reveal>
 
         {featured && (

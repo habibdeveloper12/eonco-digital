@@ -6,7 +6,7 @@ import { Reveal } from "../ui/Reveal";
 import { SplitText } from "../ui/SplitText";
 
 /** Answer-first FAQ with FAQPage structured data (featured snippets and AI answers). */
-/** Questions can be replaced in WordPress → Settings → Eonco Company Details → Homepage FAQ. */
+/** Questions can be replaced in WordPress → Settings → Company Details → Homepage FAQ. */
 export function HomeFaq({ items }: { items?: { q: string; a: string }[] }) {
   const homeFaqs = items?.length ? items : defaultFaqs;
   return (

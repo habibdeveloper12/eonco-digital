@@ -27,7 +27,7 @@ export function MobileNav({ open, onClose, onSearch, navigation = defaultNavigat
           aria-modal="true"
           aria-label="Menu"
           className={cn(
-            "fixed inset-0 z-[60] flex flex-col bg-white transition-[opacity,translate] duration-300 ease-[cubic-bezier(.2,.8,.2,1)] lg:hidden",
+            "fixed inset-0 z-[60] flex flex-col bg-white transition-[opacity,translate] duration-300 ease-[cubic-bezier(.2,.8,.2,1)] xl:hidden",
             shown ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0",
           )}
         >

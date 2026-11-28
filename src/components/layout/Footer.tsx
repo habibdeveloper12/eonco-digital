@@ -136,7 +136,7 @@ export function Footer({ settings, columns: footerColumns = defaultColumns }: { 
                 ))}
               </div>
             </div>
-            <a href="/eonco-digital-company-deck.pdf" download className="flex items-center gap-4 rounded-[14px] bg-navy p-5 text-white transition-colors hover:bg-navy-2">
+            <a href="/take-solution-today-company-deck.pdf" download className="flex items-center gap-4 rounded-[14px] bg-navy p-5 text-white transition-colors hover:bg-navy-2">
               <span className="grid size-11 place-items-center rounded-full bg-brand">
                 <Download className="size-5" />
               </span>
@@ -149,7 +149,7 @@ export function Footer({ settings, columns: footerColumns = defaultColumns }: { 
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 text-[13px] text-[#51606e] sm:flex-row">
-          <p>© {year} Eonco Digital. All rights reserved.</p>
+          <p>© {year} Take Solution Today. All rights reserved.</p>
           <div className="flex gap-6">
             <Link href="/terms-and-conditions" className="hover:text-brand">
               Terms &amp; Conditions

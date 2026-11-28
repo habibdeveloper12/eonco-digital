@@ -7,7 +7,7 @@ import { getProjects } from "@/lib/wordpress";
 
 export const metadata: Metadata = {
   title: "Case Studies",
-  description: "HubSpot implementations, integrations, migrations and websites delivered by Eonco Digital, with the results they produced.",
+  description: "HubSpot implementations, integrations, migrations and websites delivered by Take Solution Today, with the results they produced.",
   alternates: { canonical: "/case-studies" },
 };
 

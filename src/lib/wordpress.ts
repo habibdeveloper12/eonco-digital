@@ -49,8 +49,8 @@ export async function wpGet(path: string): Promise<WPItem[] | null> {
   try {
     const res = await fetch(`${WP}/wp-json/wp/v2/${path}`, { next: { revalidate: 300, tags: [WP_TAG] } });
     if (res.status === 404) {
-      // The content type is not registered: the Eonco Headless plugin is older than this website.
-      console.warn(`[wordpress] /${path.split("?")[0]} not found (update the Eonco Headless plugin), using built-in content`);
+      // The content type is not registered: the Take Solution Today Website plugin is older than this website.
+      console.warn(`[wordpress] /${path.split("?")[0]} not found (update the Take Solution Today Website plugin), using built-in content`);
       return null;
     }
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
@@ -96,7 +96,7 @@ const readTime = (html: string) => `${Math.max(1, Math.round(plain(html).split("
 export type Seo = { title?: string; description?: string; image?: string; noindex?: boolean };
 
 /**
- * Reads the "Search & social" box from the Eonco plugin. When Yoast SEO is
+ * Reads the "Search & social" box from the Take Solution Today plugin. When Yoast SEO is
  * installed its description, image and noindex are used as a fallback.
  */
 export function seoOf(it: WPItem): Seo {
@@ -225,7 +225,7 @@ export async function getFeaturedProjects(): Promise<Project[]> {
 }
 
 /* ------------------------------------------------------------------ */
-/* Site settings (WordPress → Settings → Eonco Website)                */
+/* Site settings (WordPress → Settings → Website Connection)                */
 /* ------------------------------------------------------------------ */
 
 type Stat = (typeof localStats.whoWeAre)[number];

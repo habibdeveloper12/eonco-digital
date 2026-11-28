@@ -9,7 +9,7 @@
  * - Once at least one item of a type is published in WordPress, WordPress is
  *   the list of record: unpublishing or deleting an item removes it from the
  *   website, and new items appear automatically. Until then, the built-in
- *   list is used. (WordPress → Settings → Eonco Website → "Import website
+ *   list is used. (WordPress → Settings → Website Connection → "Import website
  *   content" copies the built-in content into WordPress in one click.)
  * - When WordPress is not configured or unreachable, the built-in content is
  *   used so the site always renders.

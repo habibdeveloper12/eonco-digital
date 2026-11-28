@@ -8,7 +8,7 @@ import { cn } from "../ui/cn";
 /**
  * Hero "moment": a HubSpot-style deal board where one deal moves through the
  * pipeline and the automation behind each step is named underneath. It shows
- * what Eonco builds: a pipeline that runs itself.
+ * what Take Solution Today builds: a pipeline that runs itself.
  */
 
 type Deal = { id: string; company: string; value: number; owner: string; source: string };

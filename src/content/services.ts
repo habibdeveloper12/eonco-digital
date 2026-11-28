@@ -357,7 +357,7 @@ export const services: Service[] = [
     slug: "white-label-services", group: "digital", name: "White Label Services", navLabel: "White Label Services", icon: "Handshake",
     blurb: "A trusted delivery partner working behind the scenes for agencies.",
     heroTitle: "White Label HubSpot & Web Delivery for Agencies",
-    heroText: "Agencies use Eonco Digital as an extension of their team for HubSpot builds, integrations and websites, delivered under your brand with your processes.",
+    heroText: "Agencies use Take Solution Today as an extension of their team for HubSpot builds, integrations and websites, delivered under your brand with your processes.",
     ctaLabel: "Partner with us", focus: "white label delivery",
     types: [
       { title: "HubSpot Implementations", text: "Onboarding and hub builds for your clients." },

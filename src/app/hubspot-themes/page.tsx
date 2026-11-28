@@ -8,7 +8,7 @@ import { BrowserFrame } from "@/components/visuals/Mockups";
 import { getThemes } from "@/lib/cms";
 
 export const revalidate = 300;
-export const metadata: Metadata = { title: "HubSpot Themes", description: "Production-ready HubSpot CMS themes by Eonco Digital.", alternates: { canonical: "/hubspot-themes" } };
+export const metadata: Metadata = { title: "HubSpot Themes", description: "Production-ready HubSpot CMS themes by Take Solution Today.", alternates: { canonical: "/hubspot-themes" } };
 
 export default async function ThemesPage() {
   const themes = await getThemes();
